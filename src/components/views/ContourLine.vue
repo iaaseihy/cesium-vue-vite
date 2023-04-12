@@ -4,7 +4,7 @@
  * @Author: caochaoqiang
  * @Date: 2023-02-03 11:43:18
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-11 14:47:41
+ * @LastEditTime: 2023-04-12 14:46:10
 -->
 <template>
       <el-row>
@@ -28,7 +28,7 @@
       </div>
       <div class="demo-container">
             <div>
-               <el-checkbox v-model="viewModel.enableContour" @change="isContour"> 等高线 </el-checkbox>
+              <el-checkbox v-model="viewModel.enableContour" @change="isContour"> 等高线 </el-checkbox>
             </div>
             <div class="elevation">
             <el-slider
@@ -94,9 +94,9 @@
 
 <script>
 import * as Cesium from 'cesium'
-import Visibility from '../commonJS/viewShedTwoPoints'
-import VisualField from '../commonJS/visualField'
-import ViewShed3D from '../commonJS/ViewShed3D'
+// import Visibility from '../commonJS/viewShedTwoPoints'
+// import VisualField from '../commonJS/visualField'
+// import ViewShed3D from '../commonJS/ViewShed3D'
 // import TerrainClipPlan from '../commonJS/TerrainClipPlan'
 import TerrainClipPlan from '../commonJS/TerrainClipPlanClass'
 import ModelClipPlan from '../commonJS/modelYAPING'
@@ -743,8 +743,8 @@ export default {
       let tilesetModel = null
       viewer.scene.globe.depthTestAgainstTerrain = true
       tilesetModel = new Cesium.Cesium3DTileset({
-        url: DAYANTA3DTILES,
-        // url: 'http://earthsdk.com/v/last/Apps/assets/dayanta/tileset.json',
+        // url: DAYANTA3DTILES,
+        url: 'http://earthsdk.com/v/last/Apps/assets/dayanta/tileset.json',
         minimumPixelSize: 128,
         customShader: new Cesium.CustomShader({
           uniforms: {

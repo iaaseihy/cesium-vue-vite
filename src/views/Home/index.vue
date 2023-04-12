@@ -30,9 +30,9 @@
     <section ref="sectionRef">
       <!-- 地图 id="userMap"是@antv_l7-core@2.2.41@@antv提供的二维的地图，现在用cesiumContainer代替-->
       <!-- <div id="userMap" style="height: 100%"></div> -->
-      <!-- <keep-alive>
+      <keep-alive>
         <cesium-container ref="cesiumContainer"></cesium-container>
-      </keep-alive> -->
+      </keep-alive>
       <!-- 全国用户数据 -->
       <div class="data-info">
         <ul>
@@ -98,13 +98,13 @@ import { Scene, PointLayer, Popup } from '@antv/l7'
 import { GaodeMap } from '@antv/l7-maps'
 import UserDataPreview from './components/UserDataPreview.vue'
 import DeviceDataPreview from './components/DeviceDataPreview.vue'
-// import CesiumContainer from '../../../src/components/views/CesiumContainer.vue'
+import CesiumContainer from '../../../src/components/views/CesiumContainer.vue'
 import { cityData } from '../../utils/jsonData'
 import riseImage from '../../assets/rise.png'
 import declineImage from '../../assets/decline.png'
 export default {
   name: 'DataPreview',
-  components: { UserDataPreview, DeviceDataPreview },
+  components: { UserDataPreview, DeviceDataPreview, CesiumContainer },
   data() {
     return {
       active: 2,
