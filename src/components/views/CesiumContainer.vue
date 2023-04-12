@@ -697,44 +697,6 @@ export default {
         console.log("模型已经全部加载完成");
       });
     },
-    
-    // 修改3dtiles位置，input，range组件的change事件绑定此函数
-    update3dtilesMaxtrix() {
-      var mx = Cesium.Matrix3.fromRotationX(
-        Cesium.Math.toRadians(this.tileModelTool.rx)
-      );
-      var my = Cesium.Matrix3.fromRotationY(
-        Cesium.Math.toRadians(this.tileModelTool.ry)
-      );
-      var mz = Cesium.Matrix3.fromRotationZ(
-        Cesium.Math.toRadians(this.tileModelTool.rz)
-      );
-      var rotationX = Cesium.Matrix4.fromRotationTranslation(mx);
-      var rotationY = Cesium.Matrix4.fromRotationTranslation(my);
-      var rotationZ = Cesium.Matrix4.fromRotationTranslation(mz);
-      //平移 修改经纬度
-      var position = Cesium.Cartesian3.fromDegrees(
-        this.tileModelTool.longitude,
-        this.tileModelTool.latitude,
-        this.tileModelTool.height
-      );
-      var m = Cesium.Transforms.eastNorthUpToFixedFrame(position);
-      //旋转、平移矩阵相乘
-      Cesium.Matrix4.multiply(m, rotationX, m);
-      Cesium.Matrix4.multiply(m, rotationY, m);
-      Cesium.Matrix4.multiply(m, rotationZ, m);
-      //缩放 修改缩放比例
-      var scale = Cesium.Matrix4.fromUniformScale(this.tileModelTool.scale);
-      Cesium.Matrix4.multiply(m, scale, m);
-      //赋值给tileset
-      window.tileModel._root.transform = m;
-      //调整地下透明度
-      viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = Cesium.Math.clamp(
-        this.tileModelTool.alpha,
-        0.0,
-        1.0
-      );
-    },
 
     BAIMOEdit() {
       // 非异步加载3DTitle，并设置渐变光环
