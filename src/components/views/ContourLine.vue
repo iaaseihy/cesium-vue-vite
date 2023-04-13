@@ -4,12 +4,12 @@
  * @Author: caochaoqiang
  * @Date: 2023-02-03 11:43:18
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-12 17:20:36
+ * @LastEditTime: 2023-04-13 15:32:58
 -->
 <template>
   <el-row>
     <el-col>
-      <div class="demo-container">
+      <!-- <div class="demo-container">
         <label
           ><input
             type="radio"
@@ -26,9 +26,9 @@
             data-bind="checked: selectedShading"
           />高程渲染</label
         >
-      </div>
-      <div class="demo-container">
-        <div>
+      </div> -->
+      <!-- <div class="demo-container"> -->
+      <!-- <div>
           <label
             ><input
               type="checkbox"
@@ -48,69 +48,65 @@
             @change="test2()"
           />
           <span data-bind="text: contourSpacing"></span>m
-        </div>
-        <div class="demo-container">
-          <div>
-            <el-checkbox v-model="viewModel.enableContour" @change="isContour">
-              等高线
-            </el-checkbox>
-          </div>
-          <div class="elevation">
-            <el-slider
-              v-model="viewModel.contourSpacing"
-              @change="setMapPercentage"
-              :max="500.0"
-              :min="1.0"
-              show-input
-            />
-            <span>{{ viewModel.contourSpacing }}m</span>
-            <!-- <el-slider
-                v-model="viewModel.contourSpacing"
-                :show-tooltip="false"></el-slider> -->
-          </div>
-          <div class="lineWidth">
-            <el-slider
-              v-model="viewModel.contourWidth"
-              @change="setContourWidth"
-              :max="10.0"
-              :min="1.0"
-              :step="1.0"
-              show-input
-            />
-            <span>{{ viewModel.contourWidth }}m</span>
-            <!-- <el-slider
-                v-model="viewModel.contourSpacing"
-                :show-tooltip="false"></el-slider> -->
-          </div>
-          <div class="contourColor">
-            <el-button @click="changeColor">颜色</el-button>
-          </div>
-          <div class="visibility">
-            <el-button @click="visibilityTwoPoints(viewer)"
-              >两点通视分析</el-button
-            >
-          </div>
-          <div class="visibility">
-            <el-button @click="visualField(earth)">可视域分析</el-button>
-          </div>
-          <div class="visibility">
-            <el-button @click="viewShed3D(viewer)">超图可视域分析</el-button>
-          </div>
-          <div class="ClipPlane">
-            <el-button @click="createClipPlanAnalysis(viewer)"
-              >地形开挖分析</el-button
-            >
-          </div>
-          <div class="offClipPlane">
-            <el-button @click="clearClipPlanAnalysis()"
-              >关闭地形开挖分析</el-button
-            >
-          </div>
-          <div class="screenShot">
-            <el-button @click="add3DTiles(viewer)">模型压平</el-button>
-          </div>
-        </div>
+        </div> -->
+      <div class="demo-container">
         <div>
+          <el-checkbox v-model="viewModel.enableContour" @change="isContour(viewer)">
+            等高线
+          </el-checkbox>
+        </div>
+        <div class="elevation">
+          <el-slider
+            v-model="viewModel.contourSpacing"
+            @change="setMapPercentage"
+            :max="500.0"
+            :min="1.0"
+            show-input
+          />
+          <span>等高线间距：{{ viewModel.contourSpacing }}m</span>
+        </div>
+        <div class="lineWidth">
+          <el-slider
+            v-model="viewModel.contourWidth"
+            @change="setContourWidth"
+            :max="10.0"
+            :min="1.0"
+            :step="1.0"
+            show-input
+          />
+          <span>等高线线宽：{{ viewModel.contourWidth }}m</span>
+          <!-- <el-slider
+                v-model="viewModel.contourSpacing"
+                :show-tooltip="false"></el-slider> -->
+        </div>
+        <div class="contourColor">
+          <el-button @click="changeColor">颜色</el-button>
+        </div>
+        <div class="visibility">
+          <el-button @click="visibilityTwoPoints(viewer)"
+            >两点通视分析</el-button
+          >
+        </div>
+        <div class="visibility">
+          <el-button @click="visualField(earth)">可视域分析</el-button>
+        </div>
+        <div class="visibility">
+          <el-button @click="viewShed3D(viewer)">超图可视域分析</el-button>
+        </div>
+        <div class="ClipPlane">
+          <el-button @click="createClipPlanAnalysis(viewer)"
+            >地形开挖分析</el-button
+          >
+        </div>
+        <div class="offClipPlane">
+          <el-button @click="clearClipPlanAnalysis()"
+            >关闭地形开挖分析</el-button
+          >
+        </div>
+        <div class="screenShot">
+          <el-button @click="add3DTiles(viewer)">模型压平</el-button>
+        </div>
+        <!-- <div>
           线宽
           <input
             style="width: 125px; float: left; width: 100px"
@@ -122,16 +118,20 @@
             @click="test2"
           />
           <span data-bind="text: contourWidth"></span>px
-        </div>
-        <div>
-          <button
-            type="button"
-            data-bind="click: changeColor, enable: enableContour"
-          >
-            颜色
-          </button>
-        </div>
-        <div class="tileModelTool" style="width: 125px; float: left; width: 100px" v-if="tileModelToolVisiable">
+          <div>
+            <button
+              type="button"
+              data-bind="click: changeColor, enable: enableContour"
+            >
+              颜色
+            </button>
+          </div>
+        </div> -->
+        <div
+        class="tileModelTool"
+        style="width: 125px; float: left; width: 100px"
+        v-if="tileModelToolVisiable"
+      >
         <p>比例：</p>
         <el-input-number
           v-model="tileModelTool.scale"
@@ -144,14 +144,18 @@
         <el-input-number
           v-model="tileModelTool.longitude"
           label="描述文字"
-          @change="update3dtilesMaxtrix(viewer, 'longitude', tileModelTool.longitude)"
+          @change="
+            update3dtilesMaxtrix(viewer, 'longitude', tileModelTool.longitude)
+          "
           :step="0.00001"
         ></el-input-number>
         <p>纬度：</p>
         <el-input-number
           v-model="tileModelTool.latitude"
           label="描述文字"
-          @change="update3dtilesMaxtrix(viewer, 'latitude', tileModelTool.latitude)"
+          @change="
+            update3dtilesMaxtrix(viewer, 'latitude', tileModelTool.latitude)
+          "
           :step="0.00001"
         ></el-input-number>
         <p>高度：</p>
@@ -193,6 +197,9 @@
         ></el-slider> -->
       </div>
       </div>
+
+      
+      <!-- </div> -->
     </el-col>
   </el-row>
 </template>
@@ -217,7 +224,7 @@ export default {
       contourUniforms: {},
       shadingUniforms: {},
       viewModel: {
-        enableContour: true,
+        enableContour: false,
         contourSpacing: 50.0,
         contourWidth: 2.0,
         selectedShading: "none",
@@ -245,7 +252,7 @@ export default {
         scale: 1.0,
         longitude: 113.0625945542995,
         latitude: 22.646893660837442,
-        height: 419, //修改高度
+        height: -56, //修改高度
         rx: 0,
         ry: 0,
         rz: 33.5, //修改旋转
@@ -355,13 +362,14 @@ export default {
       this.contourUniforms.spacing = parseFloat(this.viewModel.contourSpacing);
       // this.isChange = false
     },
-    setContourWidth() {
+    setContourWidth(val) {
+      console.log(val);
       console.log(this.viewModel.contourWidth);
       this.contourUniforms.width = parseFloat(this.viewModel.contourWidth);
     },
-    isContour() {
+    isContour(viewer) {
       console.log(this.viewModel.enableContour);
-      this.viewModel.enableContour = !this.viewModel.enableContour;
+      this.updateMaterial(viewer)
     },
     /**
      * 两点可视域分析
@@ -1010,29 +1018,29 @@ export default {
       console.log(window.tileModel);
       const currentModel = window.tileModel;
       var boundingSphere = currentModel.boundingSphere;
-          var cartographic = Cesium.Cartographic.fromCartesian(
-            boundingSphere.center
-          );
+      var cartographic = Cesium.Cartographic.fromCartesian(
+        boundingSphere.center
+      );
       // 获取模型中心点经纬度坐标
       let height;
       let longitude;
       let latitude;
       let scale;
       switch (type) {
-        case 'height':
-          height= val;
+        case "height":
+          height = val;
           console.log(height);
           break;
-          /** @description:开启标尺 */
-        case 'longitude':
-          longitude= val;
+        /** @description:开启标尺 */
+        case "longitude":
+          longitude = val;
           console.log(longitude);
           break;
-        case 'latitude':
-          latitude= val;
+        case "latitude":
+          latitude = val;
           console.log(latitude);
           break;
-        case 'scale':
+        case "scale":
           scale = val;
           console.log(scale);
           break;
@@ -1057,29 +1065,25 @@ export default {
       //   this.tileModelTool.height
       // );
       if (longitude === undefined) {
-            longitude = (cartographic.longitude / Math.PI) * 180;
+        longitude = (cartographic.longitude / Math.PI) * 180;
       }
       if (latitude === undefined) {
-          latitude = (cartographic.latitude / Math.PI) * 180;
+        latitude = (cartographic.latitude / Math.PI) * 180;
       }
       if (height === undefined) {
-          height = cartographic.height;
+        height = cartographic.height;
       }
       if (scale === undefined) {
-          scale = Cesium.Matrix4.fromUniformScale(this.tileModelTool.scale);
+        scale = Cesium.Matrix4.fromUniformScale(this.tileModelTool.scale);
       }
-      var position = Cesium.Cartesian3.fromDegrees(
-        longitude,
-        latitude,
-        height
-      );
+      var position = Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
       var m = Cesium.Transforms.eastNorthUpToFixedFrame(position);
       //旋转、平移矩阵相乘
       // Cesium.Matrix4.multiply(m, rotationX, m);
       // Cesium.Matrix4.multiply(m, rotationY, m);
       // Cesium.Matrix4.multiply(m, rotationZ, m);
       //缩放 修改缩放比例
-      
+
       // if (type === 'scale') {
       //       scale = val
       // } else {
@@ -1105,6 +1109,11 @@ export default {
   margin-left: 400px;
 }
 .elevation {
-  width: auto;
+  display: flex;
+  align-items: center;
+}
+.elevation .el-slider {
+  margin-top: 0;
+  margin-left: 12px;
 }
 </style>

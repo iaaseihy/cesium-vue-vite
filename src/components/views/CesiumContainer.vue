@@ -4,12 +4,13 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-12 14:55:35
+ * @LastEditTime: 2023-04-13 13:54:18
 -->
 <template>
   <div id="cesiumContainer" class="fullSize">
-    <contour-line :test="this.testArr" :viewer="this.cesiumViewer" :earth="this.Earth" :modelUrl="this.modelUrl" ref="contourLine"></contour-line>
+    
   </div>
+  <contour-line :test="this.testArr" :viewer="this.cesiumViewer" :earth="this.Earth" :modelUrl="this.modelUrl" ref="contourLine"></contour-line>
   <!-- <div id="slider" className="slider">
         <div id="creditContainer"></div>
   </div>
@@ -1125,7 +1126,7 @@ export default {
   bottom: 0;
   right: 0;
 }
-::v-deep(.cesium-viewer-cesium3DTilesInspectorContainer) {
+:deep(.cesium-viewer-cesium3DTilesInspectorContainer) {
   right: 400px;
   top: 200px;
 }

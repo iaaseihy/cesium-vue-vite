@@ -3,14 +3,14 @@
  * @version: 1.0
  * @Author: zhangti
  * @Date: 2019-10-25 11:25:10
- * @LastEditors: iaaseihy 774249302@qq.com
- * @LastEditTime: 2023-02-10 15:55:55
+ * @LastEditors: CaoChaoqiang
+ * @LastEditTime: 2023-04-12 17:45:02
  */
 /**
  * 可视域分析
  * 超图
  */
-import * as Cesium from 'cesium'
+import * as Cesium from '/static/SuperMapCesium/Cesium.js'
 import Analyser from './analyser/analyser.js'
 export default class ViewShed3D extends Analyser {
   /**

@@ -362,13 +362,13 @@ $light_gray: #eee;
 
 <style scoped>
 /* 修改验证器样式 */
-::v-deep .el-form-item.is-error .el-input__inner {
+:deep .el-form-item.is-error .el-input__inner {
   border-color: #889aa4;
 }
-::v-deep .el-form-item.is-error .el-input__validateIcon {
+:deep .el-form-item.is-error .el-input__validateIcon {
   color: #889aa4;
 }
-::v-deep .el-form-item__error {
+:deep .el-form-item__error {
   color: #e6a23c;
 }
 </style>
