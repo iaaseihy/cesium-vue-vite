@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:35:28
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-11 11:03:22
+ * @LastEditTime: 2023-04-13 15:54:03
  */
 import { createApp } from 'vue'
 // import './style.css'
@@ -13,6 +13,8 @@ import router from './router/index.js'
 import store from './store/index'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+//引入turf.js
+import * as turf from '@turf/turf'
 
 const app = createApp(App)
 
@@ -25,5 +27,6 @@ app.config.globalProperties.$router = useRoute()
 app.use(router)
 app.use(store)
 app.use(ElementPlus)
+app.use(turf)
 app.mount('#app')
 // createApp(App).mount('#app')

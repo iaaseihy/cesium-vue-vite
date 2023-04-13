@@ -4,7 +4,7 @@
  * @Author: caochaoqiang
  * @Date: 2023-02-03 11:43:18
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-13 15:32:58
+ * @LastEditTime: 2023-04-13 17:25:13
 -->
 <template>
   <el-row>
@@ -212,6 +212,7 @@ import * as Cesium from "cesium";
 // import TerrainClipPlan from '../commonJS/TerrainClipPlan'
 import TerrainClipPlan from "../commonJS/TerrainClipPlanClass";
 import ModelClipPlan from "../commonJS/modelYAPING";
+import CutAndFillResult from '../views/CutAndFillResult/CutAndFillResult'
 import { DAYANTA3DTILES } from "../commonJS/config";
 export default {
   name: "ContourLine",
@@ -626,6 +627,7 @@ export default {
             positions
           );
           console.log("positions: ", positions, positionsgeo);
+          new CutAndFillResult(viewer, positions);
           if (options.height) {
             // 立体
             _polygonEntity.polygon.extrudedHeight = options.height;
@@ -732,7 +734,7 @@ export default {
                 bottomImg: _bottomImg,
               });
               $this.terrainClipPlan.updateData(
-                $this.transformWGS84ArrayToCartesianArray(viewer, polygon)
+                $this.transformWGS84ArrayToCartesianArray(viewer, polygon),
               );
               // terrainClipPlanObj = new TerrainClipPlan(window.viewer, {
               //             height: this.excavationDepth,

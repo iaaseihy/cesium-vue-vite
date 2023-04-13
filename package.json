@@ -12,6 +12,7 @@
     "@babel/core": "^7.11.0",
     "@babel/eslint-parser": "^7.18.2",
     "@dvgis/cesium-map": "^2.6.1",
+    "@turf/turf": "^6.5.0",
     "axios": "^0.27.2",
     "cesium": "^1.96.0",
     "coordtransform": "^2.1.2",
