@@ -1,0 +1,370 @@
+/**
+ * @Description:绘制点线面
+ * @author MrKuang
+ * @VX k792794653
+ * @date 2022/8/16 0016
+*/
+import * as Cesium from "cesium";
+import CutAndFillResult from "../CutAndFillResult/CutAndFillResult"
+// import ca from "element-ui/src/locale/lang/ca";
+
+export default class DrawTool {
+    /**
+     * 构造函数
+     * @param viewer
+     */
+    constructor(options, viewer) {
+        this.viewer = viewer;
+        this._drawHandler = null;//事件
+        this._dataSource = null;//存储entities
+        this._tempPositions = [];//存储点集合
+        this._mousePos = null;//移动点
+        this._drawType = options.drawType;//类型
+        this.callback = null;
+        this.activate(options.drawType, options.callback);
+    }
+
+    /**
+     * 激活点线面
+     * @param drawType
+     */
+    activate(drawType, callback) {
+        this.clearAll();
+        this._drawType = drawType;
+        this._dataSource = new Cesium.CustomDataSource('_dataSource');
+        this.viewer.dataSources.add(this._dataSource);
+        this._registerEvents(callback); //注册鼠标事件
+    }
+
+    /**
+     * 注册鼠标事件
+     */
+    _registerEvents(callback) {
+        this._drawHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.scene.canvas);
+        this.viewer.scene.globe.depthTestAgainstTerrain = true;//开启深度测试
+        switch (this._drawType) {
+            case 'Point': {
+                this._leftClickEventForPoint();
+                break;
+            }
+            case 'Polyline': {
+                this._leftClickEventForPolyline();
+                this._mouseMoveEventForPolyline();
+                this._rightClickEventForPolyline();
+                break;
+            }
+            case 'Polygon': {
+                this._leftClickEventForPolygon();
+                this._mouseMoveEventForPolygon();
+                this._rightClickEventForPolygon(callback);
+                break;
+            }
+        }
+    }
+
+    /**
+     * 鼠标事件之绘制点的左击事件
+     * @private
+     */
+    _leftClickEventForPoint() {
+        this._drawHandler.setInputAction((e) => {
+            // this.viewer._element.style.cursor = 'default';
+            let p = this.viewer.scene.pickPosition(e.position)
+            if (!p) return;
+            //手动给他提高50m，也可以取消哈
+            let carto_pt = Cesium.Cartographic.fromCartesian(p);
+            let p1 = [Cesium.Math.toDegrees(carto_pt.longitude), Cesium.Math.toDegrees(carto_pt.latitude), carto_pt.height + 50]
+            this._addPoint(p1);
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    }
+
+    /**
+     * 鼠标事件之绘制线的左击事件
+     * @private
+     */
+    _leftClickEventForPolyline() {
+        this._drawHandler.setInputAction((e) => {
+            let p = this.viewer.scene.pickPosition(e.position);
+            if (!p) return;
+            this._tempPositions.push(p);
+            this._addPolyline();
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    }
+
+    /**
+     * 鼠标事件之绘制线的移动事件
+     * @private
+     */
+    _mouseMoveEventForPolyline() {
+        this._drawHandler.setInputAction((e) => {
+            let p = this.viewer.scene.pickPosition(e.endPosition);
+            if (!p) return;
+            this._mousePos = p;
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+    }
+
+    /**
+     * 鼠标事件之绘制线的右击事件
+     * @private
+     */
+    _rightClickEventForPolyline() {
+        this._drawHandler.setInputAction((e) => {
+            let p = this.viewer.scene.pickPosition(e.position);
+            if (!p) return;
+            this._removeAllEvent();
+            this._dataSource.entities.removeAll();
+            this._dataSource.entities.add({
+                polyline: {
+                    positions: this._tempPositions,
+                    clampToGround: true,//贴地
+                    width: 3,
+                    material: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.YELLOW,
+                    }),
+                    depthFailMaterial: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.YELLOW,
+                    })
+                }
+            })
+        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK)
+    }
+
+    /**
+     * 鼠标事件之绘制面的左击事件
+     * @private
+     */
+    _leftClickEventForPolygon() {
+        this._drawHandler.setInputAction((e) => {
+            let p = this.viewer.scene.pickPosition(e.position);
+            if (!p) return;
+            this._tempPositions.push(p);
+            this._addPolygon();
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    }
+
+    /**
+     * 鼠标事件之绘制面的移动事件
+     * @private
+     */
+    _mouseMoveEventForPolygon() {
+        this._drawHandler.setInputAction((e) => {
+            let p = this.viewer.scene.pickPosition(e.endPosition);
+            if (!p) return;
+            this._mousePos = p;
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+    }
+
+    /**
+     * 鼠标事件之绘制面的右击事件
+     * @private
+     */
+    _rightClickEventForPolygon(cb) {
+        this._drawHandler.setInputAction((e) => {
+            let p = this.viewer.scene.pickPosition(e.position);
+            if (!p) return;
+            this._tempPositions.push((this._tempPositions)[0])
+            this._removeAllEvent();
+            this._dataSource.entities.removeAll();
+            // 挖填方分析
+            new CutAndFillResult(this.viewer, this._tempPositions);
+
+            this._dataSource.entities.add({
+                polyline: {
+                    positions: this._tempPositions,
+                    clampToGround: true,//贴地
+                    width: 3,
+                    material: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.YELLOW,
+                    }),
+                    depthFailMaterial: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.YELLOW,
+                    })
+                },
+                polygon: {
+                    hierarchy: this._tempPositions,
+                    extrudedHeightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    material: Cesium.Color.RED.withAlpha(0.4),
+                    clampToGround: true,
+                },
+            })
+            this.callback = cb;
+            console.log(this.callback);
+            if (this.callback !== null && typeof this.callback === "function") {
+                this.callback(
+                    this.transformCartesianArrayToWGS84Array(this._tempPositions),
+                    // polyObj
+                );
+            }
+            return this._tempPositions;
+        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK)
+    }
+
+    /**
+     * 移除所有鼠标事件
+     * @private
+     */
+    _removeAllEvent() {
+        this._drawHandler && (
+            this._drawHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK),
+            this._drawHandler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE),
+            this._drawHandler.removeInputAction(Cesium.ScreenSpaceEventType.RIGHT_CLICK),
+            this._drawHandler.destroy(),
+            this._drawHandler = null
+        )
+    }
+
+    /**
+     * 重置所有参数
+     * @private
+     */
+    _resetParams() {
+        if (this._dataSource != null) {
+            this._dataSource.entities.removeAll();
+            this.viewer.dataSources.remove(this._dataSource);
+        }
+        this._dataSource = null;
+        this._tempPositions = [];
+        this._mousePos = null;
+        this._drawType = null;
+    }
+
+    /**
+     * 清除
+     */
+    clearAll() {
+        this._removeAllEvent();
+        this._resetParams();
+    }
+
+    // 坐标数组转换 84转笛卡尔
+    transformCartesianArrayToWGS84Array(cartesianArr) {
+        if (this.viewer) {
+            var $this = this;
+            return cartesianArr
+                ? cartesianArr.map(function (item) {
+                    return $this.transformCartesianToWGS84(item);
+                })
+                : [];
+        }
+    }
+    // 坐标转换 笛卡尔转84
+    transformCartesianToWGS84(cartesian) {
+        if (this.viewer && cartesian) {
+            var ellipsoid = Cesium.Ellipsoid.WGS84;
+            var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+            return {
+                lng: Cesium.Math.toDegrees(cartographic.longitude),
+                lat: Cesium.Math.toDegrees(cartographic.latitude),
+                alt: cartographic.height,
+            };
+        }
+    }
+    /**
+     * 画点
+     * @param p
+     * @private
+     */
+    _addPoint(p) {
+        this._dataSource.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(p[0], p[1], p[2]),
+            point: {
+                color: Cesium.Color.RED,
+                pixelSize: 10,
+                outlineColor: Cesium.Color.YELLOW,
+                outlineWidth: 2,
+                // heightReference:Cesium.HeightReference.CLAMP_TO_GROUND
+            }
+        })
+    }
+
+    /**
+     * 画线
+     * @private
+     */
+    _addPolyline() {
+        this._dataSource.entities.add({
+            polyline: {
+                positions: new Cesium.CallbackProperty(() => {
+                    let c = Array.from((this._tempPositions));
+                    if (this._mousePos) {
+                        c.push(this._mousePos);
+                    }
+                    return c;
+                }, false),
+                clampToGround: true,//贴地
+                width: 3,
+                material: new Cesium.PolylineDashMaterialProperty({
+                    color: Cesium.Color.YELLOW,
+                }),
+                depthFailMaterial: new Cesium.PolylineDashMaterialProperty({
+                    color: Cesium.Color.YELLOW,
+                })
+            }
+        })
+    }
+
+    /**
+     * 画面
+     * @private
+     */
+    _addPolygon() {
+        if (this._tempPositions.length == 1) {
+            //一个顶点+移动点
+            this._dataSource.entities.add({
+                polyline: {
+                    positions: new Cesium.CallbackProperty(() => {
+                        let c = Array.from((this._tempPositions));
+                        if (this._mousePos) {
+                            c.push(this._mousePos);
+                        }
+                        return c;
+                    }, false),
+                    clampToGround: true,//贴地
+                    width: 3,
+                    material: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.YELLOW,
+                    }),
+                    depthFailMaterial: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.YELLOW,
+                    })
+                }
+            })
+        } else {
+            this._dataSource.entities.removeAll();
+            //两个顶点+移动点
+            this._dataSource.entities.add({
+                polygon: {
+                    hierarchy: new Cesium.CallbackProperty(() => {
+                        let poss = Array.from(this._tempPositions);
+                        if (this._mousePos) {
+                            poss.push(this._mousePos);
+                        }
+                        return new Cesium.PolygonHierarchy(poss);
+                    }, false),
+                    extrudedHeightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    material: Cesium.Color.RED.withAlpha(0.4),
+                    clampToGround: true,
+                },
+                polyline: {
+                    positions: new Cesium.CallbackProperty(() => {
+                        let c = Array.from((this._tempPositions));
+                        if (this._mousePos) {
+                            c.push(this._mousePos);
+                            c.push(c[0]);//与第一个点相连
+                        }
+                        return c;
+                    }, false),
+                    clampToGround: true,//贴地
+                    width: 3,
+                    material: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.YELLOW,
+                    }),
+                    depthFailMaterial: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.YELLOW,
+                    })
+                }
+            })
+        }
+
+    }
+}

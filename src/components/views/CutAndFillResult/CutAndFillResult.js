@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-13 16:17:28
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-13 17:28:47
+ * @LastEditTime: 2023-04-13 17:44:12
  */
 import * as Cesium from "cesium";
 import * as turf from '@turf/turf'
@@ -47,6 +47,7 @@ export default class CutAndFillResultClass {
                 result.maxHeight = Math.max(result.maxHeight, cubeInfo.maxHeight);
                 result.minHeight = Math.min(result.minHeight, cubeInfo.minHeight);
                 result.baseArea += cubeInfo.baseArea;
+                result.baseHeight = this.baseHeight;
             }
         });
         console.log(result);
@@ -185,6 +186,7 @@ export class CutAndFillResult {
     cutVolume = 0.0;
     fillVolume = 0.0;
     baseArea = 0.0;
+    baseHeight = null;
 }
 
 export class CubeInfo {

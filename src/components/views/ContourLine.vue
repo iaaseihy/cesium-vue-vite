@@ -4,7 +4,7 @@
  * @Author: caochaoqiang
  * @Date: 2023-02-03 11:43:18
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-13 17:25:13
+ * @LastEditTime: 2023-04-17 14:04:39
 -->
 <template>
   <el-row>
@@ -214,6 +214,8 @@ import TerrainClipPlan from "../commonJS/TerrainClipPlanClass";
 import ModelClipPlan from "../commonJS/modelYAPING";
 import CutAndFillResult from '../views/CutAndFillResult/CutAndFillResult'
 import { DAYANTA3DTILES } from "../commonJS/config";
+import DrawTool from "../views/measure/cesiumMeasure.js"
+
 export default {
   name: "ContourLine",
   props: ["test", "viewer", "earth", "modelUrl"],
@@ -568,6 +570,9 @@ export default {
         return false;
       }
     },
+    drawPolygonGraphicsCb: function () {
+
+    },
     /**
      * 画面 or 测面积
      * @param {*} options
@@ -636,6 +641,12 @@ export default {
           if (options.measure) {
             // 量测
             _addInfoPoint(positions[0]);
+          }
+          if (options.create) {
+            // 创建绘制几何体
+            // create()
+            _polygonEntity.polygon.extrudedHeight = options.height;
+            _polygonEntity.polygon.material = Cesium.Color.BLUE.withAlpha(0.5);
           }
           if (typeof options.callback === "function") {
             options.callback(
@@ -711,7 +722,7 @@ export default {
       // options = options || {}
       if (viewer && options) {
         // // 开启地形开挖需要先关闭地形检测
-        // viewer.scene.globe.depthTestAgainstTerrain = false
+        viewer.scene.globe.depthTestAgainstTerrain = false
         var $this = this;
         // if ($this.terrainClipPlan) {
         //   $this.terrainClipPlan.clear()
@@ -722,10 +733,13 @@ export default {
         var _wallImg = options.wallImg || "/static/texture/dzmc.jpg";
         var _bottomImg =
           options.bottomImg || "/static/texture/excavate_bottom_min.jpg";
-        $this.drawPolygonGraphics(
+        const create = 'create'
+
+        let drawTool = new DrawTool(
           {
-            callback: function (polygon, polygonObj) {
-              viewer.entities.remove(polygonObj);
+            callback: function (polygon) {
+              console.log(polygon);
+              // viewer.entities.remove(polygonObj);
 
               $this.terrainClipPlan = new TerrainClipPlan(viewer, {
                 height: _height,
@@ -736,21 +750,46 @@ export default {
               $this.terrainClipPlan.updateData(
                 $this.transformWGS84ArrayToCartesianArray(viewer, polygon),
               );
-              // terrainClipPlanObj = new TerrainClipPlan(window.viewer, {
-              //             height: this.excavationDepth,
-              //             splitNum: earthPositionList.length * 10,
-              //             bottomImg: '/static/img/bottomdz.jpg',
-              //             wallImg: '/static/img/excavate.png'
-              //           })
-              //           terrainClipPlanObj.updateData(earthPositionList)
-
               if (typeof options.callback === "function") {
                 options.callback($this.terrainClipPlan);
               }
             },
-          },
+            drawType: 'Polygon'
+          }, 
           viewer
-        );
+          );
+
+        // $this.drawPolygonGraphics(
+        //   {
+        //     callback: function (polygon, polygonObj) {
+        //       viewer.entities.remove(polygonObj);
+
+        //       $this.terrainClipPlan = new TerrainClipPlan(viewer, {
+        //         height: _height,
+        //         splitNum: _splitNum,
+        //         wallImg: _wallImg,
+        //         bottomImg: _bottomImg,
+        //       });
+        //       $this.terrainClipPlan.updateData(
+        //         $this.transformWGS84ArrayToCartesianArray(viewer, polygon),
+        //       );
+        //       // terrainClipPlanObj = new TerrainClipPlan(window.viewer, {
+        //       //             height: this.excavationDepth,
+        //       //             splitNum: earthPositionList.length * 10,
+        //       //             bottomImg: '/static/img/bottomdz.jpg',
+        //       //             wallImg: '/static/img/excavate.png'
+        //       //           })
+        //       //           terrainClipPlanObj.updateData(earthPositionList)
+
+        //       // if (typeof options.callback === "function") {
+        //       //   options.callback($this.terrainClipPlan);
+        //       // }
+        //     },
+        //     create: create,
+        //     height: 100
+        //   },
+        //   viewer
+        // );
       }
     },
     terrainClipPlanFunction(viewer) {
