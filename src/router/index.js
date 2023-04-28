@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:49:25
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-11 17:26:06
+ * @LastEditTime: 2023-04-19 17:26:06
  */
 
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -49,6 +49,11 @@ export const constantRoutes = [
     path: '/view',
     name: 'defaultView',
     component: () => import('../views/CesiumContainer.vue')
+  },
+  {
+    path: '/roaming',
+    name: 'Roam',
+    component: () => import('../components/views/three/Roaming.vue')
   }
 ]
 

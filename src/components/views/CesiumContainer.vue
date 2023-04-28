@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-13 13:54:18
+ * @LastEditTime: 2023-04-18 14:05:13
 -->
 <template>
   <div id="cesiumContainer" class="fullSize">
@@ -485,7 +485,7 @@ export default {
       // this.setContour()
 
       // 立体墙
-      // this.wllUp()
+      this.wllUp()
       // this.wallCustom()
 
       // 开启两点间可视域分析
@@ -837,7 +837,7 @@ export default {
           //     })
         },
       });
-      // viewer.zoomTo(viewer.entities)
+      viewer.zoomTo(viewer.entities)
     },
     wallCustom() {
       const material = new WallLinkCustomMaterialProperty({

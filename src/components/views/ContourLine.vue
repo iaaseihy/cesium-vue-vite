@@ -4,7 +4,7 @@
  * @Author: caochaoqiang
  * @Date: 2023-02-03 11:43:18
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-17 14:04:39
+ * @LastEditTime: 2023-04-17 15:47:36
 -->
 <template>
   <el-row>
@@ -57,6 +57,7 @@
         </div>
         <div class="elevation">
           <el-slider
+            :id="sliderId1"
             v-model="viewModel.contourSpacing"
             @change="setMapPercentage"
             :max="500.0"
@@ -64,9 +65,8 @@
             show-input
           />
           <span>等高线间距：{{ viewModel.contourSpacing }}m</span>
-        </div>
-        <div class="lineWidth">
           <el-slider
+            :id="sliderId2"
             v-model="viewModel.contourWidth"
             @change="setContourWidth"
             :max="10.0"
@@ -75,10 +75,19 @@
             show-input
           />
           <span>等高线线宽：{{ viewModel.contourWidth }}m</span>
-          <!-- <el-slider
-                v-model="viewModel.contourSpacing"
-                :show-tooltip="false"></el-slider> -->
         </div>
+        <!-- <div class="lineWidth">
+          <el-slider
+            :id="sliderId2"
+            v-model="viewModel.contourWidth"
+            @change="setContourWidth"
+            :max="10.0"
+            :min="1.0"
+            :step="1.0"
+            show-input
+          />
+          <span>等高线线宽：{{ viewModel.contourWidth }}m</span>
+        </div> -->
         <div class="contourColor">
           <el-button @click="changeColor">颜色</el-button>
         </div>
@@ -263,6 +272,14 @@ export default {
       },
       tileModelToolVisiable: true,
     };
+  },
+  computed: {
+    sliderId1() {
+      return 'slider1'; // 可以根据需求生成不同的 ID
+    },
+    sliderId2() {
+      return 'slider2'; // 可以根据需求生成不同的 ID
+    }
   },
   mounted() {},
   methods: {
@@ -1154,6 +1171,14 @@ export default {
   align-items: center;
 }
 .elevation .el-slider {
+  margin-top: 0;
+  margin-left: 12px;
+}
+.lineWidth {
+  display: flex;
+  align-items: center;
+}
+.lineWidth .el-slider {
   margin-top: 0;
   margin-left: 12px;
 }
