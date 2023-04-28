@@ -4,13 +4,77 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-18 14:05:13
+ * @LastEditTime: 2023-04-28 15:50:16
 -->
 <template>
   <div id="cesiumContainer" class="fullSize">
-    
+    <div class="panel_view">
+      <ul class="volume-main">
+        <li class="volume-clear">
+          <span @click="handleAdd()">添加</span>
+          <span @click="handleClear()">清空</span>
+        </li>
+        <li class="volume-item">
+          <span>水平张角</span>
+          <input
+            id="horizontalViewAngle"
+            type="range"
+            value="120"
+            @change="changeV($event)"
+            min="1"
+            max="120"
+          />
+        </li>
+        <li class="volume-item">
+          <span>垂直张角</span>
+          <input
+            id="verticalViewAngle"
+            type="range"
+            value="90"
+            @change="changeV($event)"
+            min="1"
+            max="90"
+          />
+        </li>
+        <li class="volume-item">
+          <span>视角距离</span>
+          <input
+            id="viewDistance"
+            type="range"
+            value="120"
+            @change="changeV($event, value)"
+            min="1"
+            max="5000"
+          />
+        </li>
+        <li class="volume-color volume-item">
+          <span>可见区域颜色</span>
+          <input
+            type="color"
+            id="visibleAreaColor"
+            value="#4dff00"
+            @change="changeV($event)"
+          />
+        </li>
+        <li class="volume-color volume-item">
+          <span>不可见区域颜色</span>
+          <input
+            type="color"
+            id="invisibleAreaColor"
+            value="#FF0000"
+            @change="changeV($event)"
+          />
+        </li>
+      </ul>
+    </div>
   </div>
-  <contour-line :test="this.testArr" :viewer="this.cesiumViewer" :earth="this.Earth" :modelUrl="this.modelUrl" ref="contourLine"></contour-line>
+  <contour-line
+    :test="this.testArr"
+    :viewer="this.cesiumViewer"
+    :earth="this.Earth"
+    :modelUrl="this.modelUrl"
+    ref="contourLine"
+  ></contour-line>
   <!-- <div id="slider" className="slider">
         <div id="creditContainer"></div>
   </div>
@@ -58,14 +122,15 @@ import negativeY from "../../assets/img/SkyBox/18h+00.jpg";
 import positiveZ from "../../assets/img/SkyBox/06h+90.jpg";
 import negativeZ from "../../assets/img/SkyBox/06h-90.jpg";
 import MeasureTool from "../../components/measureTool/MeasureTool.js";
-import ContourLine from '../../../src/components/views/ContourLine.vue'
+import ContourLine from "../../../src/components/views/ContourLine.vue";
 import WallDiffuseMaterialProperty from "../commonJS/WallDiffuseMaterialProperty";
 import WallLinkCustomMaterialProperty from "../commonJS/WallLinkCustomMaterialProperty";
 // import Visibility from '../commonJS/viewShedTwoPoints'
 // import { CV } from '../commonJS/CV.js'
 import "../../constants/data/config";
 // import gltfModel from '../../../public/static/gltf/Cesium_Man.glb'
-var viewer, viewerEye, scene, tileset1, tilesetBaimo;
+import ViewAnalysis from "../views/spatialAnalysis/viewShed/viewAnalysis.js";
+var viewer, viewerEye, scene, tileset1, tilesetBaimo, viewAnalysisCls, viewShedOpts;
 export default {
   name: "CesiumContainer",
   components: { ContourLine },
@@ -474,6 +539,7 @@ export default {
       this.cesiumViewer = viewer;
       scene = viewer.scene;
 
+      viewAnalysisCls = new ViewAnalysis(viewer);
       // // 加载100000个模型
       // this.addGlbCollection()
       // 加载大雁塔倾斜摄影
@@ -485,7 +551,7 @@ export default {
       // this.setContour()
 
       // 立体墙
-      this.wllUp()
+      // this.wllUp();
       // this.wallCustom()
 
       // 开启两点间可视域分析
@@ -654,7 +720,7 @@ export default {
 
       tileset1.readyPromise
         .then(function (currentModel) {
-          const that = this
+          const that = this;
           var scene = viewer.scene;
           var globe = scene.globe;
           //开启地下可视化
@@ -688,7 +754,7 @@ export default {
           // that.tileModelToolVisiable = true; //显示3dtiles调整工具
         })
         .catch(function (error) {
-          console.error('倾斜摄影模型加载失败：', error);
+          console.error("倾斜摄影模型加载失败：", error);
         });
 
       viewer.flyTo(tileset1);
@@ -837,7 +903,7 @@ export default {
           //     })
         },
       });
-      viewer.zoomTo(viewer.entities)
+      viewer.zoomTo(viewer.entities);
     },
     wallCustom() {
       const material = new WallLinkCustomMaterialProperty({
@@ -1106,6 +1172,33 @@ export default {
       //   instanceCollection.modelMatrix = Cesium.Matrix4.multiplyByTranslation(m, translation, new Cesium.Matrix4())
       // })
     },
+    handleAdd() {
+      viewShedOpts = {
+        // horizontalViewAngle: parseInt($("#horizontalViewAngle").val()),
+        // verticalViewAngle: parseInt($("#verticalViewAngle").val()),
+        // visibleAreaColor: parseInt($("#visibleAreaColor").val()),
+        // invisibleAreaColor: parseInt($("#invisibleAreaColor").val()),
+        horizontalViewAngle: document.getElementById('horizontalViewAngle').val,
+        verticalViewAngle: document.getElementById('verticalViewAngle').val,
+        visibleAreaColor: document.getElementById('visibleAreaColor').val,//'#4dff00',
+        invisibleAreaColor: document.getElementById('invisibleAreaColor').val,//'#FF0000'
+      }
+      console.log(viewShedOpts);
+      viewAnalysisCls.add(viewShedOpts)
+    },
+    changeV(event) {
+      viewShedOpts = {
+        horizontalViewAngle: event.target.value,
+        verticalViewAngle: event.target.value,
+        visibleAreaColor: event.target.value,
+        invisibleAreaColor: event.target.value,
+        viewDistance: event.target.value,
+      }
+      viewAnalysisCls.setCurrentOptions(viewShedOpts)
+    },
+    handleClear() {
+      viewAnalysisCls.clear()
+    }
   },
 };
 </script>
@@ -1144,5 +1237,46 @@ export default {
 }
 #creditContainer {
   display: none;
+}
+.panel_view {
+  position: absolute;
+  top: 100px;
+  right: 100px;
+  z-index: 200;
+  width: 200px;
+  height: 300px;
+  background: rgba(0, 255, 255, 0.7);
+  border: 1px solid #529dd6;
+  border-radius: 5px;
+}
+.volume-main {
+  line-height: 26px;
+  padding: 0 10px;
+}
+.volume-main li {
+  list-style-type: none;
+}
+.volume-clear {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed;
+  color: #ffffff;
+  padding-bottom: 6px;
+}
+.volume-color {
+  display: flex;
+  align-content: center;
+  justify-content: space-between;
+}
+.volume-clear span {
+  cursor: pointer;
+}
+.volume-item {
+  margin-top: 8px;
+}
+.volume-color {
+  display: flex;
+  align-content: center;
+  justify-content: space-between;
 }
 </style>
