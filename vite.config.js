@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:35:28
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-12 09:56:32
+ * @LastEditTime: 2023-05-23 10:26:35
  */
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -22,7 +22,8 @@ export default defineConfig({
       // 设置路径
       '~': path.resolve(__dirname, './'),
       // 设置别名
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      '@img': path.resolve(__dirname, './src/assets/img'), // 设置别名路径，根据实际目录结构进行调整
     }
     // https://cn.vitejs.dev/config/#resolve-extensions
     // extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue', '.html']

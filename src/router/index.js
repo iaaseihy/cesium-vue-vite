@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:49:25
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-28 16:18:35
+ * @LastEditTime: 2023-05-23 11:21:50
  */
 
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -53,7 +53,17 @@ export const constantRoutes = [
   {
     path: '/roaming',
     name: 'Roam',
-    component: () => import('../components/views/three/Roaming.vue')
+    component: () => import('../components/views/three/roaming/Roaming.vue')
+  },
+  {
+    path: '/fireFence',
+    name: 'FireFence',
+    component: () => import('../components/views/three/fireFence/FireFence.vue')
+  },
+  {
+    path: '/eldenRing',
+    name: 'EldenRing',
+    component: () => import('../components/views/three/eldenRing/EldenRing.vue')
   }
 ]
 
