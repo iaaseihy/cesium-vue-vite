@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:49:25
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-23 11:21:50
+ * @LastEditTime: 2023-05-23 15:28:21
  */
 
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -64,6 +64,17 @@ export const constantRoutes = [
     path: '/eldenRing',
     name: 'EldenRing',
     component: () => import('../components/views/three/eldenRing/EldenRing.vue')
+  },
+  {
+    path: '/qrcodeScan',
+    name: 'QRcodeScan',
+    component: () => import('../components/views/webRTC/h5ScanQrcode/home.vue')
+  }
+  ,
+  {
+    path: '/scan',
+    name: 'Scan',
+    component: () => import('../components/views/webRTC/h5ScanQrcode/scan.vue')
   }
 ]
 
