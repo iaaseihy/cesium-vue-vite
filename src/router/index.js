@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:49:25
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-23 15:28:21
+ * @LastEditTime: 2023-05-28 10:24:51
  */
 
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -34,6 +34,31 @@ export const constantRoutes = [
     path: '/cesiumContainer',
     name: 'CesiumContainer',
     component: () => import('@/components/views/CesiumContainer.vue')// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+  },
+  {
+    path: '/heatmap2d',
+    name: 'Heatmap2d',
+    component: () => import('@/components/views/cesium/heatmap2D/Heatmap2D.vue')// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+  },
+  {
+    path: '/windy2D',
+    name: 'canvasWindy2D',
+    component: () => import('@/components/views/cesium/canvasWindy2D/canvasWindy2D.vue')// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+  },
+  {
+    path: '/windy3D',
+    name: 'canvasWindy3D',
+    component: () => import('@/components/views/cesium/canvasWindy3D/canvasWindy3D.vue')// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+  },
+  {
+    path: '/pointCluster',
+    name: 'PointCluster',
+    component: () => import('@/components/views/cesium/pointCluster/PointCluster.vue')// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+  },
+  {
+    path: '/primitiveCluster',
+    name: 'PrimitiveCluster',
+    component: () => import('@/components/views/cesium/pointCluster/PrimitiveCluster.vue')// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
   },
   {
     path: '/radarscan',

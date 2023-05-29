@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:35:28
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-23 10:26:35
+ * @LastEditTime: 2023-05-26 10:34:15
  */
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -23,6 +23,7 @@ export default defineConfig({
       '~': path.resolve(__dirname, './'),
       // 设置别名
       '@': path.resolve(__dirname, './src'),
+      '@public': path.resolve(__dirname, './public'),
       '@img': path.resolve(__dirname, './src/assets/img'), // 设置别名路径，根据实际目录结构进行调整
     }
     // https://cn.vitejs.dev/config/#resolve-extensions
