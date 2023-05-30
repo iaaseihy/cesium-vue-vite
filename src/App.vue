@@ -4,21 +4,29 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:35:28
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-11 16:45:07
+ * @LastEditTime: 2023-05-30 15:42:06
 -->
 <template>
-  <!-- <div id="nav">
-    <router-link to="/">Login</router-link> |
-    <router-link to="/home">Home</router-link>
-  </div> -->
-  <router-view />
+<el-container>
+    <el-aside>
+      <Menu></Menu>
+    </el-aside>
+    <el-container>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
+    </el-container>
+  </el-container>
+  <!-- <router-view /> -->
 </template>
 
 <script>
 import { defineComponent } from 'vue'
+import Menu from '@/components/menu/Menu.vue'
 export default defineComponent({
   name: 'App',
   components: {
+    Menu
   }
 })
 </script>
@@ -39,5 +47,21 @@ body {
   color: #2c3e50;
   width: 100%;
   height: 100%;
+}
+.el-header {
+  height: 30px;
+}
+
+.el-container {
+  height: 100vh;
+}
+
+.el-main {
+  padding: 0 !important;
+  position: relative;
+}
+
+.el-aside {
+  width: auto;
 }
 </style>

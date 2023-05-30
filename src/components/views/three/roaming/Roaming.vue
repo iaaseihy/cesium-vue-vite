@@ -25,8 +25,8 @@
 import * as Three from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
-import goldenArrowPath from'../../../assets/img/roaming/golden-arrow.jpg';
-import ringTexImg from '../../../assets/img/roaming/blueRing.png'
+import goldenArrowPath from'@img/roaming/golden-arrow.jpg';
+import ringTexImg from '@img/roaming/blueRing.png'
 // 补间动画，主要用来做平滑移动、或改变
 import {TWEEN} from 'three/examples/jsm/libs/tween.module.min';
 

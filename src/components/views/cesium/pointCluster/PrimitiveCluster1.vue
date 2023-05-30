@@ -4,10 +4,10 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-29 10:59:42
+ * @LastEditTime: 2023-05-30 11:41:31
 -->
 <template>
-  <div id="cesiumContainer" class="fullSize">
+  <!-- <div id="cesiumContainer" class="fullSize">
     <div class="panel_view">
       <ul class="volume-main">
         <li class="volume-clear">
@@ -19,11 +19,26 @@
         </li>
       </ul>
     </div>
-  </div>
+  </div> -->
+  <cesium-container ref="cesiumContainer">
+    
+  </cesium-container>
+  <div class="panel_view">
+      <ul class="volume-main">
+        <li class="volume-clear">
+          <span @click="addPrimitiveCluster()">打点</span>
+          <el-button type="primary" @click="onCluster"
+            >primitive打点聚合</el-button
+          >
+          <span @click="handleClear()">清空</span>
+        </li>
+      </ul>
+    </div>
 </template>
 
 <script lang="ts">
 import * as Cesium from "cesium";
+import CesiumContainer from '@/views/CesiumContainer.vue'
 import PrimitiveCluster from "./primitiveCluster.js";
 import { getGeojson } from "@/api/api.js";
 import Dialog from "@/utils/dialog.js";
@@ -54,17 +69,23 @@ import {
   ref,
   watch,
 } from "vue";
+import { useStore } from "vuex";
 
 export default defineComponent({
+  components: { CesiumContainer },
   setup() {
     const subdomains = ref(1);
     const dialogs = ref();
-    let viewer = ref<Cesium.Viewer>();
+    let viewer = ref();
     let cesiumViewer = ref();
     let billboardsCollection = ref();
     let billboardsCollectionCombine = reactive(new Cesium.BillboardCollection());
     let primitives = ref();
     let pointFeatures = ref([]);
+    const store = useStore();
+    // viewer = store.state;
+    // console.log(viewer);
+// const { viewer } = store.state;
     const initViewer = () => {
       Cesium.Ion.defaultAccessToken =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjMmEyNjk5Ni02YjM4LTQ1NWUtOTk3Ny1mMzg5ZDFkZGEwYjYiLCJpZCI6MjYzODMsImlhdCI6MTY2NTczNDAwNX0.E8DSOKZagTy0leqyheZVzpjwrh3AactCSgQF3v22T2Q";
@@ -284,8 +305,9 @@ export default defineComponent({
     };
     // 点聚合
     const addPrimitiveCluster = () => {
+      const { viewer } = store.state;
       initCluster(viewer);
-      viewer.camera.flyTo({
+      viewer.scene.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(
           120.105014476594135,
           35.993283580640728,
@@ -298,15 +320,15 @@ export default defineComponent({
         },
       });
     };
-    const initCluster = () => {
+    const initCluster = (viewer) => {
       getGeojson("static/geojson/chuzhong.geojson").then(({ res }) => {
         console.log(res);
         const { features } = res;
         pointFeatures = features;
-        formatData(features);
+        formatData(features, viewer);
       });
     };
-    const formatData = (features) => {
+    const formatData = (features, viewer) => {
       for (let i = 0; i < features.length; i++) {
         const feature = features[i];
         const coordinates = feature.geometry.coordinates;
@@ -348,13 +370,15 @@ export default defineComponent({
       }
     };
     const onCluster = () => {
+      const { viewer } = store.state;
       getGeojson("static/geojson/schools.geojson").then(({ res }) => {
         console.log(res);
         const { features } = res;
-        formatClusterPoint(features);
+        formatClusterPoint(features, viewer);
       });
     };
-    const formatClusterPoint = (features) => {
+    const formatClusterPoint = (features, viewer) => {
+      // viewer = store.state;
       var scene = viewer.scene;
       var primitivecluster = new PrimitiveCluster();
 
@@ -527,7 +551,7 @@ export default defineComponent({
       billboardsCollection.removeAll();
     };
     onMounted(() => {
-      initViewer();
+      // initViewer();
     });
     return {
       handleClear,

@@ -4,10 +4,10 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-28 15:50:16
+ * @LastEditTime: 2023-05-29 17:15:22
 -->
 <template>
-  <div id="cesiumContainer" class="fullSize">
+  <div id="mainCesiumContainer" class="fullSize">
     <div class="panel_view">
       <ul class="volume-main">
         <li class="volume-clear">
@@ -160,7 +160,7 @@ export default {
     // this.initDefaultView()
     this.initViewer();
     // this.initEarthViewer()
-    // new Cesium.Viewer('cesiumContainer')
+    // new Cesium.Viewer('mainCesiumContainer')
     // 测量距离
     // MeasureTool.measureLineSpace(viewer, null)
     // // 测量面积
@@ -181,7 +181,7 @@ export default {
         requestVertexNormals: true,
         requestWaterMask: false,
       });
-      new Cesium.Viewer("cesiumContainer", {
+      new Cesium.Viewer("mainCesiumContainer", {
         terrainExaggeration: 0.95,
         imageryProvider: imageryProvider,
         // imageryProvider: baiduImageryProvider,
@@ -253,7 +253,7 @@ export default {
         crs: "WGS84", // 坐标系: WGS84 、BD09 、GCJ02，仅百度、高德有效
         tilingScheme: null,
       });
-      viewer = new Cesium.Viewer("cesiumContainer", {
+      viewer = new Cesium.Viewer("mainCesiumContainer", {
         terrainExaggeration: 0.95,
         imageryProvider: imageryProvider,
         // imageryProvider: baiduImageryProvider,
@@ -578,7 +578,7 @@ export default {
       viewer.scene.imagerySplitPosition = splitPosition;
     },
     initEarthViewer() {
-      this.Earth = new CV.Earth("cesiumContainer", {
+      this.Earth = new CV.Earth("mainCesiumContainer", {
         imageryProvider: CV.TAG.BASELAYER.BAIDUIMAGERY(),
         skyBox: CV.TAG.SKYBOX.customStyle(),
       });
@@ -1205,7 +1205,7 @@ export default {
 
 <style scoped>
 /* @bgc:#000; */
-#cesiumContainer {
+#mainCesiumContainer {
   background: #000;
   width: 100%;
   height: 100%;
