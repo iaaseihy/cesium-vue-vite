@@ -13,6 +13,14 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GUI } from 'dat.gui'
 import WebGL from '../commonJS/WEBGL'
 import { DoubleSide, GridHelper, Mesh, MeshBasicMaterial, PlaneBufferGeometry, AnimationMixer, Clock, Raycaster, Vector2 } from 'three'
+import boxImg from '@img/skyboxthree/pos-x.jpg';
+import right from '@img/skyboxthree/pos-x.jpg';
+import left from '@img/skyboxthree/neg-x.jpg';
+import top from '@img/skyboxthree/pos-y.jpg';
+import bottom from '@img/skyboxthree/neg-y.jpg';
+import back from '@img/skyboxthree/pos-z.jpg';
+import front from '@img/skyboxthree/neg-z.jpg';
+
 var scene , mesh // scene,mesh 两个用全局变量，不放属性里面就可以了，具体原因不知?????????
 export default {
   name: 'AnimationBinding',
@@ -136,7 +144,7 @@ export default {
      */
     createPlaneGeometryBasicMaterial() {
       var textureLoader = new Three.TextureLoader()
-      var boxImg = require('../../assets/img/skyboxthree/pos-x.jpg')
+      // var boxImg = require('../../assets/img/skyboxthree/pos-x.jpg')
       var cubeMaterial = new Three.MeshStandardMaterial({
         map: textureLoader.load(boxImg),
         color: 0xffffff
@@ -172,7 +180,7 @@ export default {
     drawPlane() {
       // 加载贴图
       let textureLoader = new Three.TextureLoader()
-      var boxImg = require('../../assets/img/skyboxthree/pos-x.jpg')
+      // var boxImg = require('../../assets/img/skyboxthree/pos-x.jpg')
       let boxTexture = textureLoader.load(boxImg)
 
       const planeBufferGeometry = new PlaneBufferGeometry(50, 50) // 创建50*50的平面
@@ -197,12 +205,12 @@ export default {
       //   let bottom = require('../assets/skybox/bottom.jpg')
       //   let back = require('../assets/skybox/back.jpg')
       //   let front = require('../assets/skybox/front.jpg')
-      let right = require('../../assets/img/skyboxthree/pos-x.jpg')
-      let left = require('../../assets/img/skyboxthree/neg-x.jpg')
-      let top = require('../../assets/img/skyboxthree/pos-y.jpg')
-      let bottom = require('../../assets/img/skyboxthree/neg-y.jpg')
-      let back = require('../../assets/img/skyboxthree/pos-z.jpg')
-      let front = require('../../assets/img/skyboxthree/neg-z.jpg')
+      // let right = require('../../assets/img/skyboxthree/pos-x.jpg')
+      // let left = require('../../assets/img/skyboxthree/neg-x.jpg')
+      // let top = require('../../assets/img/skyboxthree/pos-y.jpg')
+      // let bottom = require('../../assets/img/skyboxthree/neg-y.jpg')
+      // let back = require('../../assets/img/skyboxthree/pos-z.jpg')
+      // let front = require('../../assets/img/skyboxthree/neg-z.jpg')
 
       let skyBoxMaterialList = [
         new Three.MeshBasicMaterial({ map: textureLoader.load(right), side: DoubleSide }),

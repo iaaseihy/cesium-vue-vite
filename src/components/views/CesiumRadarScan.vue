@@ -86,7 +86,8 @@ export default {
       var ScanSegmentShader =
         'uniform sampler2D colorTexture;\n' +
         'uniform sampler2D depthTexture;\n' +
-        'varying vec2 v_textureCoordinates;\n' +
+        'in vec2 v_textureCoordinates;\n' +
+        'out vec4 fragColor;\n' +
         'uniform vec4 u_scanCenterEC;\n' +
         'uniform vec3 u_scanPlaneNormalEC;\n' +
         'uniform vec3 u_scanLineNormalEC;\n' +
@@ -128,8 +129,8 @@ export default {
         '}\n' +
         'void main()\n' +
         '{\n' +
-        'gl_FragColor = texture2D(colorTexture, v_textureCoordinates);\n' +
-        'float depth = getDepth( texture2D(depthTexture, v_textureCoordinates));\n' +
+        'fragColor = texture(colorTexture, v_textureCoordinates);\n' +
+        'float depth = getDepth( texture(depthTexture, v_textureCoordinates));\n' +
         'vec4 viewPos = toEye(v_textureCoordinates, depth);\n' +
         'vec3 prjOnPlane = pointProjectOnPlane(u_scanPlaneNormalEC.xyz, u_scanCenterEC.xyz, viewPos.xyz);\n' +
         'float dis = length(prjOnPlane.xyz - u_scanCenterEC.xyz);\n' +
@@ -146,7 +147,7 @@ export default {
         'f = abs(twou_radius -dis1) / twou_radius;\n' +
         'f = pow(f, 3.0);\n' +
         '}\n' +
-        'gl_FragColor = mix(gl_FragColor, u_scanColor, f + f0);\n' +
+        'fragColor = mix(fragColor, u_scanColor, f + f0);\n' +
         '}\n' +
         '}\n'
 
@@ -256,6 +257,7 @@ export default {
 #cesiumContainer {
   width: 100%;
   height: 100%;
+  position: absolute;
   margin: 0;
   padding: 0;
   overflow: hidden;

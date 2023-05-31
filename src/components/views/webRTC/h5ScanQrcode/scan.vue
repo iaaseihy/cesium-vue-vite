@@ -92,6 +92,15 @@ export default {
   top: 0;
   left: 0;
 }
+.scaner {
+  background: #000000;
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: calc(100% - 48px);
+}
 .scan .nav .title {
   padding: 0;
   margin: 0;

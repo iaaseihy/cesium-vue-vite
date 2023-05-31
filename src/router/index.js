@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-30 15:11:35
+ * @LastEditTime: 2023-05-31 16:46:58
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -92,6 +92,15 @@ const routes = [
         },
       },
       {
+        path: '/threeHeatmap',
+        name: 'ThreeHeatmap',
+        component: () => import('../components/views/three/heatmap3D/ThreeHeatmap3D.vue'),
+        meta: {
+          title: "高度热力图",
+          activePath: "/threejs/threeHeatmap",
+        },
+      },
+      {
         path: '/animationbinding',
         name: 'AnimationBinding',
         component: () => import('@/components/views/AnimationBinding.vue'),
@@ -125,6 +134,15 @@ const routes = [
         meta: {
           title: "2d热力图",
           activePath: "/cesium/heatmap2d",
+        },
+      },
+      {
+        path: '/heatmap2d2',
+        name: 'Heatmap2d2',
+        component: () => import('@/components/views/cesium/heatmap2D/way2/Heatmap2d.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "2d热力图方法二",
+          activePath: "/cesium/heatmap2d2",
         },
       },
       {
