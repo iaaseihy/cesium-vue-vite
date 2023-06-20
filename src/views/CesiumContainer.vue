@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: liubofang<421419567@qq.com>
  * @Date: 2021-06-15 15:08:22
- * @LastEditTime: 2023-05-30 15:32:37
+ * @LastEditTime: 2023-06-01 15:08:41
 -->
 <template>
   <div id="cesiumContainer"></div>
@@ -11,9 +11,9 @@
 <script>
 // import 'cesium/Build/Cesium/Widgets/widgets.css'
 import * as Cesium from "cesium";
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed } from "vue";
 import { useStore } from "vuex";
-import { Viewer } from 'cesium';
+import { Viewer } from "cesium";
 import {
   LOCAL_IMG_URL,
   LOCAL_TERRAIN_URL,
@@ -32,12 +32,12 @@ import negativeY from "@img/SkyBox/18h+00.jpg";
 import positiveZ from "@img/SkyBox/06h+90.jpg";
 import negativeZ from "@img/SkyBox/06h-90.jpg";
 export default {
-  name: 'CesiumContainer',
+  name: "CesiumContainer",
   setup() {
     // let viewer = ref<Viewer>(null);
     const subdomains = ref(1);
     const store = useStore();
-    let viewer = computed<Viewer>(null);
+    let viewer = computed < Viewer > null;
     let scene = ref();
     const initViewer = () => {
       Cesium.Ion.defaultAccessToken =
@@ -93,6 +93,10 @@ export default {
         tilingScheme: null,
       });
       viewer = new Cesium.Viewer("cesiumContainer", {
+        // // 指定上下文
+        // contextOptions: {
+        //   requestWebgl1: true,
+        // },
         terrainExaggeration: 0.95,
         imageryProvider: imageryProvider,
         // imageryProvider: baiduImageryProvider,
@@ -102,7 +106,7 @@ export default {
         baseLayerPicker: false,
         fullscreenButton: false,
         geocoder: false,
-        homeButton: false,
+        homeButton: true,
         navigationHelpButton: false,
         sceneModePicker: false,
         timeline: false,
@@ -208,7 +212,7 @@ export default {
       scene = viewer.scene;
 
       store.commit("initViewer", viewer);
-      
+
       viewer.camera.setView({
         // Cesium的坐标是以地心为原点，一向指向南美洲，一向指向亚洲，一向指向北极州
         // fromDegrees()方法，将经纬度和高程转换为世界坐标
@@ -304,12 +308,13 @@ export default {
       // viewer = new Viewer('cesiumContainer')
       // store.commit("initViewer", viewer);
     });
-    return { // return中的数据会被父组件拿到
+    return {
+      // return中的数据会被父组件拿到
       viewer,
-      scene
-    }
-  }
-}
+      scene,
+    };
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

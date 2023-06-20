@@ -4,86 +4,115 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-31 17:53:18
+ * @LastEditTime: 2023-06-12 16:36:14
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
   <div class="panel_view">
     <ul class="volume-main">
       <li class="volume-clear">
-        <span @click="addHeatmap2d()">添加</span>
+        <span @click="addHeatmap3d()">添加</span>
         <span @click="handleClear()">清空</span>
       </li>
     </ul>
   </div>
 </template>
-
-<script>
+  
+  <script>
 import * as Cesium from "cesium";
 import {
   defineComponent,
   getCurrentInstance,
   onMounted,
-  onUnmounted,
   ref,
   watch,
 } from "vue";
 import { useStore } from "vuex";
-import { getGeojson } from "@/api/api.js";
-import { CesiumHeatmap } from "@/components/views/cesium/heatmap2D/way2/cesiumHeatMap.js";
 import CesiumContainer from "@/views/CesiumContainer.vue";
+import Heatmap3d from "./heatmap3d.js";
 
 export default defineComponent({
   components: { CesiumContainer },
   setup() {
     const store = useStore();
-    let cesiumHeatMap = ref(null);
+    let heatMap = ref();
     // const { viewer } = store.state;
 
     // 添加热力图
-    const addHeatmap2d = async () => {
+    const addHeatmap3d = () => {
       const { viewer } = store.state;
-      const { res } = await getGeojson("static/geojson/heatMap.json");
-      const { features } = res;
-      console.log(res);
-      let heatData = [];
-      if (features?.length) {
-        heatData = features.map((item) => {
-          return {
-            x: item.properties.lng - 0.05,
-            y: item.properties.lat - 0.04,
-            value: item.properties.num,
-          };
+      let list = [];
+      for (let i = 0; i < 100; i++) {
+        list.push({
+          lnglat: [
+            117.28 + Math.random() * 0.1 * (Math.random() > 0.5 ? 1 : -1),
+            31.923 + Math.random() * 0.1 * (Math.random() > 0.5 ? 1 : -1),
+          ],
+          value: 1000 * Math.random(),
         });
       }
-      cesiumHeatMap = new CesiumHeatmap(viewer, {
-        zoomToLayer: true,
-        points: heatData,
-        heatmapDataOptions: { max: 1, min: 0 },
-        heatmapOptions: {
-          maxOpacity: 1,
-          minOpacity: 0,
+      heatMap = new Heatmap3d(viewer, {
+        list: list,
+        raduis: 15,
+        baseHeight: 800,
+        primitiveType: "TRNGLE",
+        gradient: {
+          ".3": "blue",
+          ".5": "green",
+          ".7": "yellow",
+          ".95": "red",
         },
       });
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(
+            117.28,
+            31.923,
+          20000
+        ),
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-90.0),
+          roll: 0.0,
+        },
+      });
+      console.log("heatmap3d: ", heatMap);
+    };
+    // 设置相机是否进入地下
+    const limitCameraToGround = (isOpen) => {
+      //  if (limitCameraHandler) {
+      //             limitCameraHandler();
+      //             limitCameraHandler = null;
+      //         }
+      let limitCameraHandler = viewer.camera.changed.addEventListener(
+        function () {
+          if (
+            viewer.camera._suspendTerrainAdjustment &&
+            viewer.scene.mode === Cesium.SceneMode.SCENE3D
+          ) {
+            viewer.camera._suspendTerrainAdjustment = !isOpen;
+            viewer.camera._adjustHeightForTerrain();
+          }
+        }
+      );
     };
     const handleClear = () => {
-      if (cesiumHeatMap) {
-        cesiumHeatMap.remove();
+      if (heatMap) {
+        heatMap.destroy();
       }
     };
-    onUnmounted(() => {
-      handleClear();
+    onMounted(() => {
+      // initViewer();
     });
     return {
       handleClear,
-      addHeatmap2d,
-      cesiumHeatMap,
+      addHeatmap3d,
+      limitCameraToGround,
     };
   },
 });
 </script>
-
-<style scoped>
+  
+  <style scoped>
 /* @bgc:#000; */
 #cesiumContainer {
   background: #000;
@@ -160,3 +189,4 @@ export default defineComponent({
   justify-content: space-between;
 }
 </style>
+  

@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-31 16:46:58
+ * @LastEditTime: 2023-06-19 14:28:35
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -143,6 +143,69 @@ const routes = [
         meta: {
           title: "2d热力图方法二",
           activePath: "/cesium/heatmap2d2",
+        },
+      },
+      {
+        path: '/heatmap3d',
+        name: 'Heatmap3d',
+        component: () => import('@/components/views/cesium/heatmap3D/Heatmap3D.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "3d热力图",
+          activePath: "/cesium/heatmap3d",
+        },
+      },
+      {
+        path: '/dynamicCircle',
+        name: 'DynamicCircle',
+        component: () => import('@/components/views/cesium/dynamicCircle/DynamicCircle.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "动态扩散圆环",
+          activePath: "/cesium/dynamicCircle",
+        },
+      },
+      {
+        path: '/classification',
+        name: 'Classification',
+        component: () => import('@/components/views/cesium/classification/Classification.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "分层分户",
+          activePath: "/cesium/classification",
+        },
+      },
+      {
+        path: '/modelSeprate',
+        name: 'ModelSeprate',
+        component: () => import('@/components/views/cesium/classification/ModelSeprate.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "模型拆解",
+          activePath: "/cesium/modelSeprate",
+        },
+      },
+      {
+        path: '/monomerSingle',
+        name: 'MonomerSingle',
+        component: () => import('@/components/views/cesium/classification/dynamicMonomer/DynamicMonomerSingle1.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "动态单体化single",
+          activePath: "/cesium/monomerSingle",
+        },
+      },
+      {
+        path: '/monomerWhole',
+        name: 'MonomerWhole',
+        component: () => import('@/components/views/cesium/classification/dynamicMonomer/DynamicMonomerWhole.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "动态单体化whole",
+          activePath: "/cesium/monomerWhole",
+        },
+      },
+      {
+        path: '/edgeStage',
+        name: 'EdgeStage',
+        component: () => import('@/components/views/cesium/edgeStage/EdgeStage.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "entity primitive 3dtiles描边",
+          activePath: "/cesium/edgeStage",
         },
       },
       {
