@@ -200,6 +200,15 @@ const routes = [
         },
       },
       {
+        path: '/busRoutes',
+        name: 'BusRoutes',
+        component: () => import('@/components/views/cesium/multiRoutesPlay/BusSimulation.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "班车轨迹回放",
+          activePath: "/cesium/busRoutes",
+        },
+      },
+      {
         path: '/edgeStage',
         name: 'EdgeStage',
         component: () => import('@/components/views/cesium/edgeStage/EdgeStage.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;

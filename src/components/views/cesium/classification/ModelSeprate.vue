@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-19 16:38:08
+ * @LastEditTime: 2023-06-21 14:53:16
 -->
 <template>
   <!-- <cesium-container ref="cesiumContainer"> </cesium-container> -->
@@ -646,8 +646,8 @@ export default defineComponent({
         sceneModePicker: true,
         baseLayerPicker: true,
         navigationHelpButton: true,
-        animation: true,
-        timeline: true,
+        animation: false,
+        timeline: false,
         fullscreenButton: true,
         vrButton: true,
         //关闭点选出现的提示框
@@ -655,6 +655,8 @@ export default defineComponent({
         infoBox: false,
       });
       viewer._cesiumWidget._creditContainer.style.display = "none"; // 隐藏版权
+      // 显示帧率
+      viewer.scene.debugShowFramesPerSecond = true;
       initModel();
     });
     onUnmounted(() => {

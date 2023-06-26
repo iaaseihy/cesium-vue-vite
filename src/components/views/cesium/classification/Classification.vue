@@ -314,6 +314,8 @@ export default {
         homeButton: false,
         terrainProvider: new Cesium.EllipsoidTerrainProvider({}),
       });
+      // 显示帧率
+      viewer.scene.debugShowFramesPerSecond = true;
       self.set3Dtitle2();
       self.cylinderModel();
       self.boxFloodModel("first");
@@ -410,13 +412,6 @@ export default {
                 viewer.scene.primitives.remove(tilesFloodTest);
                 // tilesFloodTest.destroy()
               }
-              // if (viewer.scene.primitives.length > 0) {
-              //   viewer.scene.primitives._primitives.forEach((element) => {
-              //     // if (element.typeof(ClassificationPrimitive)) {
-              //     //   viewer.scene.primitives.remove(element);
-              //     // }
-              //   });
-              // }
             }
           } else {
             self.buildMessageBoxShow = false;
@@ -449,8 +444,11 @@ export default {
 </script>
   <style scoped lang="scss">
 #cesiumDemo {
-  width: 100vw;
-  height: 100vh;
+  background: #000;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
 }
 .ceshiIptBox {
   position: absolute;
