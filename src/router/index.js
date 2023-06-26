@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-19 14:28:35
+ * @LastEditTime: 2023-06-26 16:52:01
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -206,6 +206,15 @@ const routes = [
         meta: {
           title: "班车轨迹回放",
           activePath: "/cesium/busRoutes",
+        },
+      },
+      {
+        path: '/clipModel',
+        name: 'ClipModel',
+        component: () => import('@/components/views/cesium/modelClip/ModelClip.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "模型裁剪",
+          activePath: "/cesium/clipModel",
         },
       },
       {
