@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-26 16:52:01
+ * @LastEditTime: 2023-06-27 14:54:02
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -224,6 +224,15 @@ const routes = [
         meta: {
           title: "第一人称漫游",
           activePath: "/cesium/fppRoaming",
+        },
+      },
+      {
+        path: '/roaming',
+        name: 'Roaming',
+        component: () => import('@/components/views/cesium/roaming/FPPRoming.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "漫游2",
+          activePath: "/cesium/roaming",
         },
       },
       {

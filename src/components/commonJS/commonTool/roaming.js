@@ -67,7 +67,8 @@ export default class Roaming {
     for (let i = 0; i < lineLength; i++) {
       const time = Cesium.JulianDate.addSeconds(start, i * increment, new Cesium.JulianDate())
       const position = Lines[i]
-      property.addSample(time, position)
+      property.addSample(time, new Cesium.Cartesian3(Lines[i].longitude, Lines[i].latitude, Lines[i].height))
+      // property.addSample(time, position)
     }
     return property
   }
