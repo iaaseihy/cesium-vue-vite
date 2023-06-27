@@ -218,6 +218,15 @@ const routes = [
         },
       },
       {
+        path: '/fppRoaming',
+        name: 'FppRoaming',
+        component: () => import('@/components/views/cesium/fppRoaming/FPPRoming.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "第一人称漫游",
+          activePath: "/cesium/fppRoaming",
+        },
+      },
+      {
         path: '/edgeStage',
         name: 'EdgeStage',
         component: () => import('@/components/views/cesium/edgeStage/EdgeStage.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
