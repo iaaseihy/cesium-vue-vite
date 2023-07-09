@@ -4,12 +4,13 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-27 15:06:23
+ * @LastEditTime: 2023-06-27 16:08:48
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
   <!-- <div id="cesiumContainer"></div> -->
-  <div class="panel_view">
+  <el-container>
+    <div class="panel_view">
     <ul class="volume-main">
       <li class="volume-clear">
         <span @click="roaming()">roaming漫游</span>
@@ -31,6 +32,43 @@
       </li>
     </ul>
   </div>
+  <div style="color:white;display:none" class="flyByKeywordContainer">
+            <table class="infoPanel">
+                <tbody>
+                    <tr>
+                        <td>左右: <span id="heading"></span>°</td>
+                    </tr>
+                    <tr>
+                        <td>← 左/→ 右</td>
+                    </tr>
+                    <tr>
+                        <td>上下: <span id="pitch"></span>°</td>
+                    </tr>
+                    <tr>
+                        <td>↑ 上/↓ 下</td>
+                    </tr>
+                    <tr>
+                        <td>倾斜: <span id="roll"></span>°</td>
+                    </tr>
+                    <tr>
+                        <td>← + shift 左/→ + shift 右</td>
+                    </tr>
+                    <tr>
+                        <td>速度: <span id="speed"></span>m/s</td>
+                    </tr>
+                    <tr>
+                        <td>↑ + shift  加速/↓ + shift 减速</td>
+                    </tr>
+                    <tr>
+                        <td>跟随飞机
+                            <input id="fromBehind" type="checkbox">
+                        </td>
+                    </tr>
+    
+                </tbody>
+            </table>
+        </div>
+  </el-container>
 </template>
       
       <script>
@@ -385,6 +423,7 @@ export default defineComponent({
      * 键盘控制飞行
      **/
     const flyByKeyword = () => {
+      const { viewer } = store.state;
       viewer.entities.removeAll();
       viewer.scene.primitives.removeAll();
       let display = document.getElementsByClassName("flyByKeywordContainer")[0]
@@ -444,18 +483,19 @@ export default defineComponent({
       var fixedFrameTransform =
         Cesium.Transforms.localFrameToFixedFrameGenerator("north", "west");
 
-      var planePrimitive = scene.primitives.add(
-        Cesium.Model.fromGltf({
-          url: "http://openlayers.vip/cesium/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
-          modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(
-            position,
-            hpRoll,
-            Cesium.Ellipsoid.WGS84,
-            fixedFrameTransform
-          ),
-          minimumPixelSize: 128,
-        })
-      );
+      var planePrimitive = viewer.entities.getById("fly")
+      // var planePrimitive = scene.primitives.add(
+      //   Cesium.Model.fromGltf({
+      //     url: "http://openlayers.vip/cesium/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
+      //     modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(
+      //       position,
+      //       hpRoll,
+      //       Cesium.Ellipsoid.WGS84,
+      //       fixedFrameTransform
+      //     ),
+      //     minimumPixelSize: 128,
+      //   })
+      // );
 
       planePrimitive.readyPromise.then(function (model) {
         // Play and loop all animations at half-speed
@@ -592,7 +632,9 @@ export default defineComponent({
       stopFly(false);
       //   viewer.scene.primitives.removeAll();
     };
-    onMounted(() => {});
+    onMounted(() => {
+      flyByKeyword();
+    });
     onUnmounted(() => {
       handleClear();
     });

@@ -3,8 +3,8 @@
  * @version: 1.0
  * @Author: zhangti
  * @Date: 2019-09-23 09:33:34
- * @LastEditors: iaaseihy 774249302@qq.com
- * @LastEditTime: 2023-02-10 17:13:52
+ * @LastEditors: CaoChaoqiang
+ * @LastEditTime: 2023-06-27 17:01:54
  */
 import * as Cesium from 'cesium'
 /**
@@ -37,7 +37,7 @@ var WXTX = (function() {
     t = this
   }
   _.prototype.destroy = function() {
-    if (viewer == undefined && viewer == null) {
+    if (viewer === undefined && viewer === null) {
       console.log('没有获取到视图')
       return false
     }
@@ -70,7 +70,7 @@ var WXTX = (function() {
     })
   }
   _.prototype.scan2 = function() {
-    if (satelliteAll.length == 0 && satelliteAll == undefined) return
+    if (satelliteAll.length === 0 && satelliteAll === undefined) return
     for (var i in satelliteAll) {
       var positions = satelliteAll[i].position.getValue(viewer.clock.currentTime)
       scan_p = t.getPoint(positions)
@@ -85,11 +85,11 @@ var WXTX = (function() {
     return Cesium.Cartesian3.fromDegrees(lng, lat, 0)
   }
   _.prototype.createEntity = function(radar) {
-    if (radar.length == 0 && radar == undefined) return
+    if (radar.length === 0 && radar === undefined) return
     for (var n in radar) { // radar
       var l, r
       var positions = radar[n].position.getValue()
-      if (positions.length == 0) return
+      if (positions.length === 0) return
       var cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(positions)
       var lat = Cesium.Math.toDegrees(cartographic.latitude); var lon = Cesium.Math.toDegrees(cartographic.longitude); var height = cartographic.height
       // radarscan
@@ -117,7 +117,7 @@ var WXTX = (function() {
     }
   }
   _.prototype.getSatelliteInfo = function() {
-    if (transit.length == 0) return
+    if (transit.length === 0) return
     t.getSatelliteTime(transit)// 格式化通信数据
     selectedEntity.name = 'PASS'
     selectedEntity.description = t.infoTable_1(dayjs(Cesium.JulianDate.addHours(viewer.clock.currentTime, -8, new Cesium.JulianDate())).format('YYYY-MM-DD HH:mm:ss'))
@@ -126,8 +126,8 @@ var WXTX = (function() {
       if (!clock.shouldAnimate) return
       if (iden)selectedEntity.description = t.infoTable_1(t.pass(clock))// 标识符  进来展示所有卫星信息
       if (!iden) {
-        if (pickedFeature == null) return
-        if (pickedFeature.type == 'radar') {
+        if (pickedFeature === null) return
+        if (pickedFeature.type === 'radar') {
           pickedFeature.id.description = pickedFeature.temp + t.infoTable_1(t.pass(clock))
         } else {
           var position = pickedFeature.id.position.getValue(clock.currentTime)
@@ -138,7 +138,7 @@ var WXTX = (function() {
     })
     viewer.clock.onStop.addEventListener(function(clock) {
       // 格式化卫星数据
-      if (transit.length == 0) return
+      if (transit.length === 0) return
       t.getSatelliteTime(transit)
     })
   }
@@ -148,7 +148,7 @@ var WXTX = (function() {
     return currentTime
   }
   _.prototype.index_rm = function(n) {
-    if (pass_old.length == 0) return
+    if (pass_old.length === 0) return
     pass_old[n].splice(0, 1) // 删除第一个
   }
   _.prototype.getSatelliteTime = function(transit) {
@@ -169,7 +169,7 @@ var WXTX = (function() {
     }
   }
   _.prototype.infoTable_1 = function(currentTime) {
-    if (pass_old.length == 0) return
+    if (pass_old.length === 0) return
     var tr = ''; var table = '<table class="cesium-infoBox-defaultTable"><thead><tr><th>卫星</th><th>倒计时(ms)</th><th>通信开始(date)</th><th>通信结束(date)</th><th>通信时长(ms)</th></tr></thead><tbody>'
     for (var n in pass_old) {
       if (pass_old[n].length == 0) continue
@@ -187,14 +187,14 @@ var WXTX = (function() {
     return table + tr + '</tbody></table>'
   }
   _.prototype.infoTable_2 = function(f_name, cartesian) {
-    if (f_name == undefined && cartesian == undefined) return
+    if (f_name === undefined && cartesian === undefined) return
     var tr = ''; var table = '<h2> Position </h2><table class="cesium-infoBox-defaultTable"><thead><tr><th>Name</th><th>Latitude</th><th>Longitude</th><th>Elevation</th></tr></thead><tbody>'
     var f_point = [parseInt(cartesian.longitude / Math.PI * 180), parseInt(cartesian.latitude / Math.PI * 180)]
     tr = `<tr><td>${f_name}</td><td>${f_point[0]}°</td><td>${f_point[1]}°</td><td> ${parseInt(cartesian.height)}</td></tr>`
     return table + tr + '</tbody></table>'
   }
   _.prototype.infoTable_3 = function(currentTime, featureName) {
-    if (passTime.length == 0 && featureName == undefined) return
+    if (passTime.length === 0 && featureName === undefined) return
     var t_interval = function() {
       for (var i in passTime) { if (passTime[i][0].name.indexOf(featureName) != -1) return passTime[i] }
     }
@@ -210,10 +210,10 @@ var WXTX = (function() {
   _.prototype.handle = function() {
     // 点击追踪
 	   handle.setInputAction(function(click) {
-      if (viewer.scene.pick(click.position) == undefined) return
+      if (viewer.scene.pick(click.position) === undefined) return
       pickedFeature = viewer.scene.pick(click.position)
-      if (!Cesium.defined(pickedFeature) && pickedFeature == undefined) return
-      if (pickedFeature.id.description == undefined) return // 自己创建的
+      if (!Cesium.defined(pickedFeature) && pickedFeature === undefined) return
+      if (pickedFeature.id.description === undefined) return // 自己创建的
       var f_name = pickedFeature.id.name; var f_position; var table
       try {
         var position = pickedFeature.id.position.getValue()
@@ -592,7 +592,7 @@ function arewAnalyze(viewer, maxH, interval, speed, t) {
     const ray = viewer.camera.getPickRay(movement.position)
     cartesian = viewer.scene.globe.pick(ray, viewer.scene)
     // cartesian = viewer.scene.camera.pickEllipsoid(movement.position, viewer.scene.globe.ellipsoid);
-    if (positions.length == 0) {
+    if (positions.length === 0) {
       positions.push(cartesian.clone())
     }
     // positions.pop();
@@ -845,9 +845,9 @@ var TileLonlatController = (function() {
   }
   _.setParameter = function(obj) {
     var _self = this
-    _self.color = obj.color == null ? _self.color : obj.color
-    _self.alpha = obj.alpha == null ? _self.alpha : obj.alpha
-    _self.show = obj.show == null ? _self.show : obj.show
+    _self.color = obj.color === null ? _self.color : obj.color
+    _self.alpha = obj.alpha === null ? _self.alpha : obj.alpha
+    _self.show = obj.show === null ? _self.show : obj.show
   }
   _.getParameter = function(param) {
     return this[param]
@@ -962,7 +962,7 @@ var TileLonlatController = (function() {
   }
 
   _.select = function(viewer) { // 点击查询初始化的数据
-    if (tableparam.length == 0) return
+    if (tableparam.length === 0) return
     var selectData = []
     for (var i in tableparam) {
       var val = $('#_ids' + (parseInt(i) + 1)).val()
@@ -980,9 +980,9 @@ var TileLonlatController = (function() {
   }
   _.switch = function(type) {
     viewer.imageryLayers.remove(layer)
-    if (type == 'grid') {
+    if (type === 'grid') {
       this.createGrid()
-    } else if (type == 'mgrs') {
+    } else if (type === 'mgrs') {
       this.createMgrs()
     } else {
       this.createDefault()
@@ -993,7 +993,7 @@ var TileLonlatController = (function() {
     if (layers.xmlData.data != null) { viewer.dataSource.remove(layers.xmlData.data) };
   }
   _.removeType = function(type, flag) {
-    if (flag == '0') {
+    if (flag === '0') {
       if (layers[type].data != null)viewer.imageryLayers.remove(layers[type].data)
     } else {
       console.log(123)
@@ -1071,7 +1071,7 @@ var CesiumRadar1 = (function() {
   }
 
   _.setPixelRange = function(value) {
-    if (value == '' && value == null) return
+    if (value === '' && value === null) return
     this._raderData.clustering.pixelRange = value
     this.customStyle()
   }
@@ -1137,7 +1137,7 @@ var CesiumRadar1 = (function() {
   }
   _.clear = function() {
     var t = this
-    if (t._raderData == null) return
+    if (t._raderData === null) return
     viewer.dataSources.remove(t._raderData)
     // t._raderData.show = false;
   }
@@ -1166,7 +1166,7 @@ var CesiumWind = (function() {
   function _() {};
 
   _.init = function(param, flag) {
-    if (param == '' && param == null) return
+    if (param === '' && param === null) return
 
     viewer = param.viewer
     if (flag) this.build(param)
@@ -1183,10 +1183,10 @@ var CesiumWind = (function() {
   }
 
   _.build = function(param) {
-    if (param == '' && param == null) return
+    if (param === '' && param === null) return
     var cw = this
     $.get(param.sources, {}, function(json) {
-      if (json == '' && json == null) return
+      if (json === '' && json === null) return
       param.data = json
       cw.windy = new Windy(param, param.viewer)
       cw.windy.animate()
@@ -1221,8 +1221,8 @@ var CesiumWind = (function() {
   _.controller = function (obj) {
     if (obj === null & obj === '') return
     var key = obj.key; var value = parseInt(obj.value)
-    if (key == 'color') this.windy.color = getColor(value)
-    if (key == 'SPEED_RATE') this.windy.SPEED_RATE = value
+    if (key === 'color') this.windy.color = getColor(value)
+    if (key === 'SPEED_RATE') this.windy.SPEED_RATE = value
   }
   _.createToolbar = function() {
     var toolbarparam	 = [
@@ -1256,7 +1256,7 @@ var CesiumWind = (function() {
     $('#content select,input').css('width', '200px')
   }
   _.select = function(viewer) { // 点击查询初始化的数据
-    if (tableparam.length == 0) return
+    if (tableparam.length === 0) return
     var selectData = []
     for (var i in tableparam) {
       var val = $('#_ids' + (parseInt(i) + 1)).val()
@@ -1654,13 +1654,13 @@ var CesiumHeatMap = (function () {
     var t = this; heatmap = null, cacheData = null
     switch (param.handleType) {
 			 case 'CesiumHeatmap': {
-        if (heatmap == null) {
+        if (heatmap === null) {
           heatmap = new CesiumHeatmap(t.viewer, param.datas)
         };
         break
       }
       default: {
-			  if (heatmap == null) {
+			  if (heatmap === null) {
           heatmap = new CesiumHeatmapGL(t.viewer, param.datas)
 			  };
       }
@@ -1683,11 +1683,11 @@ var CesiumHeatMap = (function () {
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
   }
   _.switch = function(type) {
-    if (cacheData == null) return
+    if (cacheData === null) return
     var t = this
     try {
       t.show(2)
-      if (type == 'heatmap') {
+      if (type === 'heatmap') {
 				 heatmap = new CesiumHeatmap(t.viewer, cacheData)
       } else {
 				 heatmap = new CesiumHeatmapGL(t.viewer, cacheData)
@@ -1708,7 +1708,7 @@ var CesiumHeatMap = (function () {
     $('#content select,input').css('width', '200px')
   }
   _.select = function(viewer) {
-    if (tableparam.length == 0) return
+    if (tableparam.length === 0) return
     var selectData = []
     for (var i in tableparam) {
       var val = $('#_ids' + (parseInt(i) + 1)).val()
@@ -1728,7 +1728,7 @@ var CesiumHeatMap = (function () {
     heatmap.multiply(parseFloat(obj.value))
   }
   _.remove = function() {
-    if (heatmap == null) return
+    if (heatmap === null) return
     // heatmap.clear();
     heatmap.none()
   }

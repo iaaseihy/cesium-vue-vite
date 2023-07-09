@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-27 14:54:02
+ * @LastEditTime: 2023-06-30 16:29:19
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -233,6 +233,33 @@ const routes = [
         meta: {
           title: "漫游2",
           activePath: "/cesium/roaming",
+        },
+      },
+      {
+        path: '/modifyRegion',
+        name: 'ModifyRegion',
+        component: () => import('@/components/views/cesium/modifyRegion/ModifyRegion.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "地形抹平",
+          activePath: "/cesium/modifyRegion",
+        },
+      },
+      {
+        path: '/markGrid',
+        name: 'MarkGrid',
+        component: () => import('@/components/views/cesium/markGrid/markGrid.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "标注网格",
+          activePath: "/cesium/markGrid",
+        },
+      },
+      {
+        path: '/trailLineFlyPath',
+        name: 'TrailLineFlyPath',
+        component: () => import('@/components/views/cesium/trailLineFlyPath/TrailLineFlyPath.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "航行路线",
+          activePath: "/cesium/trailLineFlyPath",
         },
       },
       {

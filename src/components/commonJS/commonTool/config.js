@@ -4,7 +4,7 @@
  * @Author: sueRimn
  * @Date: 2019-09-19 09:10:57
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-07 16:49:50
+ * @LastEditTime: 2023-06-28 14:05:19
  */
 //
 /**
@@ -14,8 +14,8 @@ import * as Cesium from 'cesium'
 import SceneTree from './sceneTree.js'
 import Handler from './handler.js'
 import MouseManager from './mouseManager.js'
-// import * as Vue from './vue.min.js'
-import Vue from '@vitejs/plugin-vue'
+import * as Vue from './vue.min.js'
+// import Vue from '@vitejs/plugin-vue'
 let lensFlare = null; let latlonMsg = null
 const lon = 117.191166; const lat = 34.289749; const zoom = 15000000
 export default class CONFIG {

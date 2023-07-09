@@ -4,7 +4,7 @@
  * @Author: caochaoqiang
  * @Date: 2023-02-03 11:43:18
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-27 13:53:56
+ * @LastEditTime: 2023-06-28 15:32:35
 -->
 <template>
   <el-row>
@@ -215,8 +215,8 @@
 
 <script>
 import * as Cesium from "cesium";
-// import Visibility from '../commonJS/viewShedTwoPoints'
-// import VisualField from '../commonJS/visualField'
+import Visibility from '../commonJS/viewShedTwoPoints'
+import VisualField from '../commonJS/visualField'
 // import ViewShed3D from '../commonJS/ViewShed3D'
 // import TerrainClipPlan from '../commonJS/TerrainClipPlan'
 import TerrainClipPlan from "../commonJS/TerrainClipPlanClass";
