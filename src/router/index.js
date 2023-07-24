@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-30 16:29:19
+ * @LastEditTime: 2023-07-24 14:23:13
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -107,6 +107,15 @@ const routes = [
         meta: {
           title: "animationbinding",
           activePath: "/threejs/animationbinding",
+        },
+      },
+      {
+        path: '/timeTunnel',
+        name: 'TimeTunnel',
+        component: () => import('@/components/views/three/timeTunnel/TimeTunnel.vue'),
+        meta: {
+          title: "时空隧道",
+          activePath: "/threejs/timeTunnel",
         },
       },
     ]
