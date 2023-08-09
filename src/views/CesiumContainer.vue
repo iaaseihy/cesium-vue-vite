@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: liubofang<421419567@qq.com>
  * @Date: 2021-06-15 15:08:22
- * @LastEditTime: 2023-06-21 14:44:07
+ * @LastEditTime: 2023-08-02 17:47:53
 -->
 <template>
   <div id="cesiumContainer"></div>
@@ -38,6 +38,7 @@ export default {
     const subdomains = ref(1);
     const store = useStore();
     let viewer = computed < Viewer > null;
+    let imageryProvider = computed < Cesium.UrlTemplateImageryProvider > null;
     let scene = ref();
     const initViewer = () => {
       Cesium.Ion.defaultAccessToken =
@@ -59,7 +60,7 @@ export default {
         tileMatrixSetID: "GoogleMapsCompatible",
       });
       // 本地影像
-      var imageryProvider = new Cesium.UrlTemplateImageryProvider({
+      imageryProvider = new Cesium.UrlTemplateImageryProvider({
         url: LOCAL_IMG_URL,
         //   url: GAODE_IMG_URL,
         tilingScheme: new Cesium.WebMercatorTilingScheme(),
@@ -114,6 +115,7 @@ export default {
         selectionIndicator: false,
         infoBox: false,
       });
+      store.state.imageryProvider = imageryProvider;
       // 通过imageryLayers获取图层列表集合
       var layers = viewer.scene.imageryLayers;
       // 图层列表集合的addImageryProvider方法:

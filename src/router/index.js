@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-07-24 14:23:13
+ * @LastEditTime: 2023-08-02 16:12:31
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -245,6 +245,24 @@ const routes = [
         },
       },
       {
+        path: '/rocket',
+        name: 'Rocket',
+        component: () => import('@/components/views/cesium/rocketLaunch/rocket.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "火箭发射",
+          activePath: "/cesium/rocket",
+        },
+      },
+      {
+        path: '/wmsLayer',
+        name: 'WmsLayer',
+        component: () => import('@/components/views/cesium/wmsLayer/wmsLayer.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "wms查询",
+          activePath: "/cesium/wmsLayer",
+        },
+      },
+      {
         path: '/modifyRegion',
         name: 'ModifyRegion',
         component: () => import('@/components/views/cesium/modifyRegion/ModifyRegion.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
@@ -341,6 +359,15 @@ const routes = [
         meta: {
           title: "默认视图",
           activePath: "/cesium/view",
+        },
+      },
+      {
+        path: '/vFor',
+        name: 'vFor',
+        component: () => import('@/components/views/cesium/vFor/vFor.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "v_for v-if",
+          activePath: "/cesium/vFor",
         },
       },
     ]

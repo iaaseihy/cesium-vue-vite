@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-30 11:41:31
+ * @LastEditTime: 2023-08-08 10:12:27
 -->
 <template>
   <!-- <div id="cesiumContainer" class="fullSize">
@@ -76,7 +76,7 @@ export default defineComponent({
   setup() {
     const subdomains = ref(1);
     const dialogs = ref();
-    let viewer = ref();
+    let viewer = ref<Cesium.Viewer>();
     let cesiumViewer = ref();
     let billboardsCollection = ref();
     let billboardsCollectionCombine = reactive(new Cesium.BillboardCollection());

@@ -15,6 +15,7 @@
     "@turf/turf": "^6.5.0",
     "axios": "^0.27.2",
     "cesium": "^1.96.0",
+    "cesium-popup-es6": "^0.28.0",
     "coordtransform": "^2.1.2",
     "core-js": "^3.6.5",
     "dat.gui": "^0.7.9",
