@@ -2,10 +2,29 @@
  * @version: 1.0.0
  * @Author: liubofang<421419567@qq.com>
  * @Date: 2021-06-15 15:08:22
- * @LastEditTime: 2023-08-02 17:47:53
+ * @LastEditTime: 2023-08-14 10:33:57
 -->
 <template>
-  <div id="cesiumContainer"></div>
+  <div id="cesiumContainer">
+    <div id="latlng_show" style="position:absolute;">
+  <div style="float:left;">
+       <font size="1" color="white">经度：<span id="longitude_show"></span>  </font>
+  </div>
+  <br>
+  <div style="float:left;">
+       <font size="1" color="white">纬度：<span id="latitude_show"></span>  </font>
+  </div>
+    <br>
+  <div style="float:left;">
+       <font size="1" color="white">视角高：<span id="altitude_show"></span>km  </font>
+  </div>
+   <br>
+  <div style="float:left;">
+       <font size="1" color="white">海拔高：<span id="elevation_show"></span>m</font>
+  </div>
+ 
+</div>
+  </div>
 </template>
 
 <script>
@@ -209,6 +228,32 @@ export default {
       console.log("inspectorViewModel: ", inspectorViewModel);
 
       const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+      // g跟随鼠标获取经纬度和海拔
+      let longitude_show = document.getElementById('longitude_show');
+      let latitude_show = document.getElementById('latitude_show');
+      let altitude_show = document.getElementById('altitude_show');
+      let elevation_show = document.getElementById('elevation_show');
+      let ellipsoid = viewer.scene.globe.ellipsoid;
+      handler.setInputAction(function(movement){
+            //捕获椭球体，将笛卡尔二维平面坐标转为椭球体的笛卡尔三维坐标，返回球体表面的点
+             var cartesian=viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
+              if(cartesian){
+                   //将笛卡尔三维坐标转为地图坐标（弧度）
+                   var cartographic=viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
+                   //将地图坐标（弧度）转为十进制的度数
+                    var lat_String=Cesium.Math.toDegrees(cartographic.latitude).toFixed(4);
+                    var log_String=Cesium.Math.toDegrees(cartographic.longitude).toFixed(4);
+                    var alti_String=(viewer.camera.positionCartographic.height/1000).toFixed(2);
+                    let elec_String;
+                    if (viewer.scene.globe.getHeight(cartographic)) {
+                      elec_String =viewer.scene.globe.getHeight(cartographic).toFixed(4);
+                    }
+                    longitude_show.innerHTML=log_String;
+                    latitude_show.innerHTML=lat_String;
+                    altitude_show.innerHTML=alti_String;//视角高度 km
+                    elevation_show.innerHTML=elec_String;//海拔
+               }
+        },Cesium.ScreenSpaceEventType.MOUSE_MOVE);
       store.state.cesiumDrawHandler = handler;
       window.cesiumViewer = viewer;
       scene = viewer.scene;
@@ -329,5 +374,15 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
+}
+#latlng_show {
+  position: absolute;
+    display: block;
+    bottom: 40px;
+    right: -210px;
+    width: 340px;
+    height: 30px;
+    z-index: 100;
+    font-size:1px;
 }
 </style>

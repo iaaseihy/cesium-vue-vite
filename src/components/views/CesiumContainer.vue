@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-29 17:15:22
+ * @LastEditTime: 2023-08-14 10:01:21
 -->
 <template>
   <div id="mainCesiumContainer" class="fullSize">
@@ -369,9 +369,9 @@ export default {
       });
 
       // sliderBar
-      // var layersL = viewer.imageryLayers
-      // var googleLayer = layersL.addImageryProvider(ArcGisMap)
-      // googleLayer.splitDirection = Cesium.ImagerySplitDirection.LEFT// 设置图层在左侧
+      var layersL = viewer.imageryLayers
+      var googleLayer = layersL.addImageryProvider(ArcGisMap)
+      googleLayer.splitDirection = Cesium.ImagerySplitDirection.LEFT// 设置图层在左侧
 
       // var slider = document.getElementById('slider')
       // viewer.scene.imagerySplitPosition = (slider.offsetLeft) / slider.parentElement.offsetWidth
@@ -1083,7 +1083,7 @@ export default {
       }
       console.log(
         "地图变化监听事件",
-        extent,
+        extent.height,
         (extent.xmin + extent.xmax) / 2,
         (extent.ymax + extent.ymin) / 2
       );

@@ -46,6 +46,7 @@ export default defineComponent({
     // 添加红色圆形扩散(视角变化的时候圆形扩散有位置跟着移动的问题)
     const addDynamicCircle = () => {
       const { viewer } = store.state;
+      viewer.scene.globe.depthTestAgainstTerrain = true; // 开启地形深度探测
       var lng = 117.90365282568267;
       var lat = 40.16773126252592;
       var cartographicCenter = new Cesium.Cartographic(
@@ -109,6 +110,7 @@ export default defineComponent({
     // 添加扩散圆形
     const addDiffuseDynamicCircle = () => {
       const { viewer } = store.state;
+      viewer.scene.globe.depthTestAgainstTerrain = true; // 开启地形深度探测
       circleDiffusion = new CircleDiffusion(viewer, "circle");
       circleDiffusion.add([120.36, 36.09, 10], "#F7EB08", 2000, 5000);
       viewer.camera.flyTo({

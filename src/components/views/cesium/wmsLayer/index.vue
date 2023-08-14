@@ -63,7 +63,10 @@
   <style lang="scss">
   .box {
     width: 240px;
-    position: absolute;
+    // position: absolute;
+    position: relative;
+    bottom: 0;
+    left: 0;
   }
   .close{
     position: absolute;

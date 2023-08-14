@@ -3,8 +3,8 @@
  * @version: v1.0
  * @Author: caochaoqiang
  * @Date: 2023-02-06 17:12:37
- * @LastEditors: caochaoqiang
- * @LastEditTime: 2023-02-07 11:00:05
+ * @LastEditors: CaoChaoqiang
+ * @LastEditTime: 2023-08-11 14:24:40
  */
 import * as Cesium from 'cesium'
 
@@ -63,9 +63,9 @@ export default class WallLinkCustomMaterialProperty {
           vec2 st = materialInput.st;\n\
           \n\ "
         if (options.freely === 'vertical') { // （由下到上）
-          materail += 'vec4 colorImage = texture2D(image, vec2(fract(float(' + options.count + ')*st.t ' + options.direction + ' time), fract(st.s)));\n\ '
+          materail += 'vec4 colorImage = texture(image, vec2(fract(float(' + options.count + ')*st.t ' + options.direction + ' time), fract(st.s)));\n\ '
         } else { // （逆时针）
-          materail += 'vec4 colorImage = texture2D(image, vec2(fract(float(' + options.count + ')*st.s ' + options.direction + ' time), fract(st.t)));\n\ '
+          materail += 'vec4 colorImage = texture(image, vec2(fract(float(' + options.count + ')*st.s ' + options.direction + ' time), fract(st.t)));\n\ '
         }
         // 泛光
         materail += "vec4 fragColor;\n\

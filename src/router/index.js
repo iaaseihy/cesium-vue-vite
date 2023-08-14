@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-02 16:12:31
+ * @LastEditTime: 2023-08-14 13:42:58
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -260,6 +260,33 @@ const routes = [
         meta: {
           title: "wms查询",
           activePath: "/cesium/wmsLayer",
+        },
+      },
+      {
+        path: '/trackMatte',
+        name: 'TrackMatte',
+        component: () => import('@/components/views/cesium/trackMatte/trackMatte.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "反选遮罩",
+          activePath: "/cesium/trackMatte",
+        },
+      },
+      {
+        path: '/dynamicWall',
+        name: 'DynamicWall',
+        component: () => import('@/components/views/cesium/shaderEdit/dynamicWall.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "动态立体墙",
+          activePath: "/cesium/dynamicWall",
+        },
+      },
+      {
+        path: '/darkMap',
+        name: 'DarkMap',
+        component: () => import('@/components/views/cesium/darkMap/darkMap.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "暗色电子地图",
+          activePath: "/cesium/darkMap",
         },
       },
       {

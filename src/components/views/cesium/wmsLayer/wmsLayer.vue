@@ -1,10 +1,10 @@
 <!--
- * @Descripttion: 道路穿梭线
+ * @Descripttion: wms服务加载查询 注意：动态弹窗只有在不添加地形的时候能拖动缩放不会发生位置偏移
  * @version: v1.0
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-09 10:57:21
+ * @LastEditTime: 2023-08-14 16:59:51
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -120,6 +120,7 @@ export default defineComponent({
     };
     const bubble = (id) => {
       const { viewer } = store.state;
+      viewer.scene.globe.depthTestAgainstTerrain = true; // 开启地形深度探测
       if (bubbles) {
         bubbles.windowClose();
       }
@@ -127,11 +128,11 @@ export default defineComponent({
       viewer.scene.globe.depthTestAgainstTerrain = true; //（开启）
 
       // 方法一
-      // bubbles = new Bubble(
-      //   Object.assign(poinEntity[id], {
-      //     viewer: viewer,
-      //   })
-      // );
+      bubbles = new Bubble(
+        Object.assign(poinEntity[id], {
+          viewer: viewer,
+        })
+      );
 
       // 方法二
       let val = Object.assign(poinEntity[id], {
