@@ -11,7 +11,7 @@
 // import Cartographic from "cesium/Source/Core/Cartographic.js";
 // import SceneTransforms from "cesium/Source/Scene/SceneTransforms.js";
 // import defined from "cesium/Source/Core/defined.js";
-import {Viewer, Math, Cesium3DTileFeature, Cartesian2, Cartesian3, Cartographic, SceneTransforms, defined} from 'cesium';
+import { Viewer, Math, Cesium3DTileFeature, Cartesian2, Cartesian3, Cartographic, SceneTransforms, defined } from 'cesium';
 import './info.css';
 import * as util from './util.js'
 // ====================
@@ -46,6 +46,7 @@ class InfoTool {
         util.setCss(options.element, "opacity", "0");
         util.setCss(options.element.querySelector("div:nth-child(1)"), "height", "0");
         util.setCss(options.element.querySelector("div:nth-child(2)"), "opacity", "0");
+        util.setCss(options.element.querySelector("div:nth-child(3)"), "top", "100");
 
         // 回调
         callback();
@@ -71,10 +72,12 @@ class InfoTool {
             util.setCss(element, "opacity", "1");
             util.setCss(element.querySelector("div:nth-child(1)"), "transition", "ease 1s");
             util.setCss(element.querySelector("div:nth-child(2)"), "transition", "opacity 1s");
+            util.setCss(element.querySelector("div:nth-child(2)"), "transition", "opacity 1s");
             util.setCss(element.querySelector("div:nth-child(1)"), "height", "80px");
             util.setCss(element.querySelector("div:nth-child(2)"), "pointer-events", "auto");
             window.setTimeout(function () {
                 util.setCss(element.querySelector("div:nth-child(2)"), "opacity", "1");
+                util.setCss(element.querySelector("div:nth-child(3)"), "opacity", "1");
             }, 500);
         }, 100);
         const divPosition = Cartesian3.fromDegrees(lon, lat, height);
@@ -101,6 +104,9 @@ class InfoTool {
                 util.setCss(element, "left", parseInt(canvasPosition.x + offset[0]) + "px");
                 util.setCss(element, "top", parseInt(canvasPosition.y + offset[1]) + "px");
                 util.setCss(element, "z-index", parseInt(100));
+
+                
+
                 // 是否在地球背面隐藏
                 if (hideOnBehindGlobe) {
                     const cameraPosition = camera.position;
@@ -129,7 +135,11 @@ class InfoTool {
         this.#element.classList.add("helsing-three-plugins-infotool");
         this.#element.appendChild(document.createElement("div"));
         this.#element.appendChild(document.createElement("div"));
+        this.#element.appendChild(document.createElement("div"));
         viewer.container.appendChild(this.#element);
+
+
+
     }
 
     /**
@@ -186,7 +196,7 @@ class InfoTool {
 
         // 1.组织信息
         let info = '';
-            if (options.type === "info") {
+        if (options.type === "info") {
             // 拾取要素
             const feature = inputFeature || this.viewer.scene.pick(cartesian2d);
             // 判断拾取要素为空返回
@@ -215,7 +225,8 @@ class InfoTool {
                 }
             }
         } else {
-            options.content && (info = options.content);
+            // options.content && (info = options.content);
+            options.content && (info = options.pos);
         }
 
         // 2.生成特效
@@ -238,6 +249,7 @@ class InfoTool {
 
         InfoTool.#createInfoTool(this.viewer, options, function () {
             util.setInnerText(that.#element.querySelector("div:nth-child(2)"), info);
+            util.setInnerText(that.#element.querySelector("div:nth-child(3)"), 'X');
             typeof callback === "function" && callback();
         });
     }
@@ -252,6 +264,7 @@ class InfoTool {
         util.setCss(this.#element, "opacity", "0");
         util.setCss(this.#element.querySelector("div:nth-child(1)"), "transition", "");
         util.setCss(this.#element.querySelector("div:nth-child(2)"), "transition", "");
+        util.setCss(this.#element.querySelector("div:nth-child(3)"), "transition", "");
         util.setCss(this.#element.querySelector("div:nth-child(1)"), "height", "0");
         util.setCss(this.#element.querySelector("div:nth-child(2)"), "pointer-events", "none");
     };

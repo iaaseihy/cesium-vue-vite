@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-22 11:21:24
+ * @LastEditTime: 2023-08-22 16:25:53
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -55,6 +55,7 @@ export default defineComponent({
     let layer;
     let handler;
     let tilesetBaimo = ref < Cesium.Cesium3DTileset > null;
+    let pickEntity;
     let wallPosition1 = Cesium.Cartesian3.fromDegreesArrayHeights([
       104.07263175401185, 30.647622150198725, 1500.0, 104.06369117158526,
       30.648834374000277, 1500.0, 104.06437182811021, 30.62274533905387, 1500.0,
@@ -391,7 +392,7 @@ export default defineComponent({
         });
       viewer.scene.primitives.add(tilesetBaimo);
       viewer.flyTo(tilesetBaimo);
-      let pickEntity = new InfoTool(viewer);
+      pickEntity = new InfoTool(viewer);
       handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
       handler.setInputAction(function (movement) {
         let pick = viewer.scene.pick(movement.position);
@@ -883,7 +884,7 @@ export default defineComponent({
         });
       viewer.scene.primitives.add(tilesetBaimo);
       viewer.flyTo(tilesetBaimo);
-      let pickEntity = new InfoTool(viewer);
+      pickEntity = new InfoTool(viewer);
       handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
       let pickedObject;
       handler.setInputAction(function (movement) {
@@ -893,10 +894,7 @@ export default defineComponent({
           // scene.pick: 返回scene中指定位置的顶端的primitive属性的一个对象
           pickedObject = scene.pick(movement.position);
           // 判断是否拾取到模型
-          if (
-            scene.pickPositionSupported &&
-            Cesium.defined(pickedObject)
-          ) {
+          if (scene.pickPositionSupported && Cesium.defined(pickedObject)) {
             let cartesian = viewer.scene.pickPosition(movement.position);
             // 是否获取到空间坐标
             if (Cesium.defined(cartesian)) {
@@ -907,7 +905,11 @@ export default defineComponent({
               let lat = Cesium.Math.toDegrees(cartographic.latitude);
               //模型高度
               let height = cartographic.height;
-              pickedObject.pos = Cesium.Cartesian3.fromDegrees(lon, lat, height);
+              pickedObject.pos = Cesium.Cartesian3.fromDegrees(
+                lon,
+                lat,
+                height
+              );
               console.log("模型表面的经纬度高程是：", {
                 x: lon,
                 y: lat,
@@ -931,6 +933,25 @@ export default defineComponent({
           viewer.scene
         );
         console.log(featuresPromise);
+
+        // 获取div:nth-child(3)元素
+        // let div3 = document.querySelector("div:nth-child(3)");
+        let divElement = document.getElementsByClassName(
+          "helsing-three-plugins-infotool"
+        );
+        let div3 = divElement[0].children[2];
+        if (div3) {
+          // 添加鼠标点击事件监听器
+          // div3.addEventListener("click", (event) => {
+          //   isClicked = true;
+          //   // 在这里编写鼠标点击事件的处理逻辑
+          //   console.log("鼠标点击了div:nth-child(3)");
+          // });
+          div3.onclick = function () {
+            console.log("鼠标点击了div:nth-child(3)");
+            windowClose();
+          };
+        }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
       // tilesetBaimo.tileVisible.addEventListener(function (res) {
       //   let content = res.content;
@@ -944,6 +965,13 @@ export default defineComponent({
       //     }
       //   }
       // });
+    };
+    //关闭
+    const windowClose = () => {
+      const { viewer } = store.state;
+      if (pickEntity) {
+        pickEntity.remove();
+      }
     };
     /* Cesium修改地图颜色代码(暗色电子地图) */
     const modifyMap = () => {

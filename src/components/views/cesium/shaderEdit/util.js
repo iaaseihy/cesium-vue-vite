@@ -79,6 +79,12 @@
         : !!(obj && typeof obj === 'object' && (obj.nodeType === 1 || obj.nodeType === 9) && typeof obj.nodeName === 'string');
 };
 
+export function addClick (srcNodeRef) {
+    if (this.isElement(srcNodeRef)) {
+        // srcNodeRef.innerText = value;
+    }
+}
+
 /**
  * 获取全球唯一ID。
  *
