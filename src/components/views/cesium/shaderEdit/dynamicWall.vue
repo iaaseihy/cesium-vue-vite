@@ -4,24 +4,24 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-14 16:57:19
+ * @LastEditTime: 2023-08-22 11:21:24
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
-  <div class="panel_view">
-    <ul class="volume-main">
-      <li class="volume-clear">
-        <span @click="wllUp()">添加向上泛光墙</span>
-        <span @click="wallCustom()">添加向下泛光墙</span>
-        <span @click="boolInside()">判断点是否在泛光墙内</span>
-        <span @click="BAIMOEdit()">白膜变色</span>
-        <span @click="modifyMap()">添加暗色电子地图</span>
-      </li>
-    </ul>
-  </div>
   <div style="position: absolute; top: 10px; left: 10px; z-index: 9">
     <el-button @click="dragEntity()">开始拖拽</el-button>
     <el-button @click="cancelDragEntity()">取消拖拽</el-button>
+    <el-button @click="addTetrahedronPrimitive()">添加旋转发光四棱锥</el-button>
+    <el-button @click="addPyramidGeometry()">添加动态泛光四棱锥</el-button>
+    <el-button @click="add3DTiles()">添加建筑自定义光源</el-button>
+    <el-button @click="add3DTilesSnow()">添加倾斜摄影积雪效果</el-button>
+    <el-button @click="BAIMOLight()">添加白模泛光效果</el-button>
+    <el-button @click="wllUp()">添加向上泛光墙</el-button>
+    <el-button @click="wallCustom()">添加向下泛光墙</el-button>
+    <el-button @click="boolInside()">判断点是否在泛光墙内</el-button>
+    <el-button @click="BAIMOEdit()">白膜变色(鼠标点击事件报错)</el-button>
+    <el-button @click="BAIMOEditWay2()">白膜变色2</el-button>
+    <el-button @click="modifyMap()">添加暗色电子地图</el-button>
   </div>
 </template>
 
@@ -42,13 +42,18 @@ import WallDiffuseMaterialProperty from "../../../commonJS/WallDiffuseMaterialPr
 import WallLinkCustomMaterialProperty from "../../../commonJS/WallLinkCustomMaterialProperty.js";
 import json from "../../../../../public/static/geojson/jiangsu.json";
 import DragTool from "./DragTool.js";
-
+import TetrahedronPrimitive from "./TetrahedronPrimitive.js";
+import PyramidGeometry from "./PyramidGeometry.js";
+import InfoTool from "./InfoTool.js";
 export default defineComponent({
   components: { CesiumContainer },
   setup() {
     const store = useStore();
     let entities;
     let entityDrag;
+    let imageryProvider;
+    let layer;
+    let handler;
     let tilesetBaimo = ref < Cesium.Cesium3DTileset > null;
     let wallPosition1 = Cesium.Cartesian3.fromDegreesArrayHeights([
       104.07263175401185, 30.647622150198725, 1500.0, 104.06369117158526,
@@ -89,7 +94,319 @@ export default defineComponent({
     const cancelDragEntity = () => {
       const { viewer } = store.state;
       state.dragtool?.cancelDrag();
-      viewer.entities.removeById('dragEntity');
+      viewer.entities.removeById("dragEntity");
+    };
+    const add3DTilesSnow = () => {
+      const { viewer } = store.state;
+      const modelArr = [];
+      let tilesetModel = null;
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+      tilesetModel = new Cesium.Cesium3DTileset({
+        // url: DAYANTA3DTILES,
+        url: "http://earthsdk.com/v/last/Apps/assets/dayanta/tileset.json",
+        minimumPixelSize: 128,
+        customShader: new Cesium.CustomShader({
+          lightingModel: Cesium.LightingModel.UNLIT,
+          fragmentShaderText: `
+          void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material)
+          {
+              vec3 normalEC = fsInput.attributes.normalEC;
+              vec3 normalMC = czm_inverseNormal * normalEC;
+              vec3 color = material.diffuse;
+              vec3 white = vec3(1.0,1.0,1.0);
+              float m = dot(normalMC, vec3(0.0,0.0,1.0));
+              m = pow(m,5.0);
+              material.diffuse = mix(color, white, clamp(m,0.0,1.0) * 0.5);
+          }
+          `,
+        }),
+        enableModelExperimental: true,
+      });
+      // this.setOpenModelHeight(tilesetModel, true);
+      // this.setModelHeight(tilesetModel, 50);
+      tilesetModel.readyPromise.then(function (argument) {
+        const heightOffset = 0; // 调整倾斜摄影高度，防止飘和进入地下
+
+        const boundingSphere = tilesetModel.boundingSphere;
+        const cartographic = Cesium.Cartographic.fromCartesian(
+          boundingSphere.center
+        );
+        const surface = Cesium.Cartesian3.fromRadians(
+          cartographic.longitude,
+          cartographic.latitude,
+          0.0
+        );
+        const offset = Cesium.Cartesian3.fromRadians(
+          cartographic.longitude,
+          cartographic.latitude,
+          heightOffset
+        );
+        const translation = Cesium.Cartesian3.subtract(
+          offset,
+          surface,
+          new Cesium.Cartesian3()
+        );
+        tilesetModel.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+        viewer.scene.primitives.add(tilesetModel);
+        modelArr.push(tilesetModel);
+      });
+      viewer.flyTo(tilesetModel);
+      console.log("模型积雪：" + tilesetModel);
+    };
+    const add3DTiles = () => {
+      const { viewer } = store.state;
+      const modelArr = [];
+      let tilesetModel = null;
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+      tilesetModel = new Cesium.Cesium3DTileset({
+        // url: DAYANTA3DTILES,
+        url: "http://earthsdk.com/v/last/Apps/assets/dayanta/tileset.json",
+        minimumPixelSize: 128,
+        customShader: new Cesium.CustomShader({
+          lightingModel: Cesium.LightingModel.UNLIT,
+          uniforms: {
+            u_cameraDirectionWC: {
+              type: Cesium.UniformType.VEC3,
+              value: viewer.scene.camera.positionWC,
+            },
+            u_lightColor1: {
+              type: Cesium.UniformType.VEC4,
+              // value: lightPoint1.color,
+              value: Cesium.Color.BLUE,
+            },
+            u_lightPos1: {
+              type: Cesium.UniformType.VEC3,
+              // value: lightPoint1.postion,
+              value: Cesium.Cartesian3.fromDegrees(108.9573, 34.2274, 387.9688),
+            },
+            u_lightColor2: {
+              type: Cesium.UniformType.VEC4,
+              // value: lightPoint2.color,
+              value: Cesium.Color.RED,
+            },
+            u_lightPos2: {
+              type: Cesium.UniformType.VEC3,
+              // value: lightPoint2.postion,
+              value: Cesium.Cartesian3.fromDegrees(108.957, 34.226, 386.4178),
+            },
+            u_lightColor3: {
+              type: Cesium.UniformType.VEC4,
+              // value: lightPoint3.color,
+              value: Cesium.Color.GREEN,
+            },
+            u_lightPos3: {
+              type: Cesium.UniformType.VEC3,
+              // value: lightPoint3.postion,
+              value: Cesium.Cartesian3.fromDegrees(108.9605, 34.2223, 390.135),
+            },
+          },
+          fragmentShaderText: `
+        vec4 makeLight(vec4 lightColorHdr,vec3 lightPos,
+          vec3 positionWC,vec3 positionEC,vec3 normalEC,czm_pbrParameters pbrParameters)
+        {
+          vec3 color = vec3(0.0);
+          float mx1 = 1.0;
+          vec3 light1Dir = positionWC - lightPos;
+          float distance1 = length(light1Dir);
+          if(distance1 < 1000.0){
+            vec4 l1 = czm_view * vec4(lightPos, 1.0);
+            vec3 lightDirectionEC = l1.xyz - positionEC;
+            mx1 = 1.0 - distance1 / 1000.0;
+            color = czm_pbrLighting(
+              positionEC,
+              normalEC,
+              lightDirectionEC,
+              lightColorHdr.xyz,
+              pbrParameters
+            ).xyz;
+          }
+          mx1 = max(color.r,max(color.g,color.b)) * pow(mx1,1.0) * 10.0;
+          return vec4(color,mx1);
+        }
+        void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material)
+        {
+          material.diffuse = vec3(1.0);
+          vec3 positionWC = fsInput.attributes.positionWC;
+          vec3 normalEC = fsInput.attributes.normalEC;
+          vec3 positionEC = fsInput.attributes.positionEC;
+
+          vec3 lightColorHdr = czm_lightColorHdr;
+          vec3 lightDirectionEC = czm_lightDirectionEC;
+          lightDirectionEC = (czm_view * vec4(u_cameraDirectionWC,1.0)).xyz - positionEC;
+
+          czm_pbrParameters pbrParameters;
+          pbrParameters.diffuseColor = material.diffuse;
+          pbrParameters.f0 = vec3(0.5);
+          pbrParameters.roughness = 1.0;
+
+          vec3 ligth1Color0 = czm_pbrLighting(
+            positionEC,
+            normalEC,
+            lightDirectionEC,
+            lightColorHdr,
+            pbrParameters
+          );
+
+          vec4 ligth1ColorR = makeLight(u_lightColor1,u_lightPos1,positionWC,positionEC,normalEC,pbrParameters);
+          vec4 ligth1ColorG = makeLight(u_lightColor2,u_lightPos2,positionWC,positionEC,normalEC,pbrParameters);
+          vec4 ligth1ColorB = makeLight(u_lightColor3,u_lightPos3,positionWC,positionEC,normalEC,pbrParameters);
+
+          vec3 finalColor = mix(ligth1Color0.rgb, ligth1ColorR.rgb, ligth1ColorR.a);
+          finalColor = mix(finalColor, ligth1ColorG.rgb, ligth1ColorG.a);
+          finalColor = mix(finalColor, ligth1ColorB.rgb, ligth1ColorB.a);
+          material.diffuse = finalColor;
+        }
+        `,
+        }),
+        enableModelExperimental: true,
+      });
+      // this.setOpenModelHeight(tilesetModel, true);
+      // this.setModelHeight(tilesetModel, 50);
+      tilesetModel.readyPromise.then(function (argument) {
+        const heightOffset = 0; // 调整倾斜摄影高度，防止飘和进入地下
+        const boundingSphere = tilesetModel.boundingSphere;
+        const cartographic = Cesium.Cartographic.fromCartesian(
+          boundingSphere.center
+        );
+        const surface = Cesium.Cartesian3.fromRadians(
+          cartographic.longitude,
+          cartographic.latitude,
+          0.0
+        );
+        const offset = Cesium.Cartesian3.fromRadians(
+          cartographic.longitude,
+          cartographic.latitude,
+          heightOffset
+        );
+        const translation = Cesium.Cartesian3.subtract(
+          offset,
+          surface,
+          new Cesium.Cartesian3()
+        );
+        tilesetModel.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+        viewer.scene.primitives.add(tilesetModel);
+        modelArr.push(tilesetModel);
+      });
+      viewer.flyTo(tilesetModel);
+      console.log("模型压平：" + tilesetModel);
+    };
+    const addTetrahedronPrimitive = () => {
+      const { viewer } = store.state;
+      var positionaa = Cesium.Cartesian3.fromDegrees(104.0752, 30.6077, 700.0);
+      //加入场景
+      var tetrahedronPrimitive = new TetrahedronPrimitive({
+        viewer: viewer,
+        position: positionaa,
+        color: Cesium.Color.fromCssColorString("#FF0000"),
+        imageUrl: "../",
+      });
+      viewer.scene.primitives.add(tetrahedronPrimitive);
+      //开启动画
+      tetrahedronPrimitive.startAnimate();
+      //关闭动画
+      //tetrahedronPrimitive.closeAnimate();
+    };
+    const addPyramidGeometry = () => {
+      const { viewer } = store.state;
+      viewer.scene.primitives.add(new PyramidGeometry());
+    };
+    const BAIMOLight = () => {
+      const { viewer } = store.state;
+      // 非异步加载3DTitle，并设置渐变光环
+      // var tilesetBaimo = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+      //   url: BAIMO3DTILES
+      // }))
+
+      // 异步加载
+      const tilesetJson = {
+        url: BAIMO3DTILES,
+      };
+      // 抬升高度
+      const height = 430;
+      tilesetBaimo = new Cesium.Cesium3DTileset({
+        // url: DAYANTA3DTILES,
+        // url: BAIMO3DTILES,
+        url: Cesium.IonResource.fromAssetId(75343),
+        minimumPixelSize: 128,
+        customShader: new Cesium.CustomShader({
+          lightingModel: Cesium.LightingModel.UNLIT,
+          uniforms: {
+            maxHeight: {
+              type: Cesium.UniformType.FLOAT,
+              value: 0.0,
+            },
+            minHeight: {
+              type: Cesium.UniformType.FLOAT,
+              value: 0.0,
+            },
+          },
+          fragmentShaderText: `
+          void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
+                  float curz = fsInput.attributes.positionMC.z;
+                  float d = (curz - minHeight) / (maxHeight - minHeight);
+                  float r = 0.01;
+                  r = fract(r * czm_frameNumber);
+                  float c = smoothstep(r, r+0.03, d) - smoothstep(r + 0.035,r + 0.04, d);
+                  vec3 linearColor = mix(vec3(1.0,1.0,1.0) ,vec3(255.0,48.0,48.0)/255.0,r);
+                  vec3 renderColor = mix(vec3(0.0,0.96,1.0) ,linearColor,c);
+                  material.diffuse = renderColor;
+      }`,
+        }),
+        backFaceCulling: false,
+      });
+      tilesetBaimo.readyPromise
+        .then(function (tileset) {
+          // 白膜高度抬升
+          var boundingSphere = tileset.boundingSphere;
+          var cartographic = Cesium.Cartographic.fromCartesian(
+            boundingSphere.center
+          );
+          var surface = Cesium.Cartesian3.fromRadians(
+            cartographic.longitude,
+            cartographic.latitude,
+            0.0
+          );
+          var offset = Cesium.Cartesian3.fromRadians(
+            cartographic.longitude,
+            cartographic.latitude,
+            height
+          );
+          const translation = Cesium.Cartesian3.subtract(
+            offset,
+            surface,
+            new Cesium.Cartesian3()
+          );
+          tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+          let [maxheight, minheight] = [
+            tileset.properties.Height.maximum,
+            tileset.properties.Height.minimum,
+          ];
+          tileset.customShader.setUniform("maxHeight", maxheight);
+          tileset.customShader.setUniform("minHeight", minheight);
+          console.log(`Maximum building height: ${maxheight}`);
+          console.log(`Minimum building height: ${minheight}`);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      viewer.scene.primitives.add(tilesetBaimo);
+      viewer.flyTo(tilesetBaimo);
+      let pickEntity = new InfoTool(viewer);
+      handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+      handler.setInputAction(function (movement) {
+        let pick = viewer.scene.pick(movement.position);
+        if (Cesium.defined(pick)) {
+          console.log(pick);
+          pickEntity.add(pick);
+        } else {
+        }
+        const pickRay = viewer.camera.getPickRay(movement.position);
+        const featuresPromise = viewer.imageryLayers.pickImageryLayerFeatures(
+          pickRay,
+          viewer.scene
+        );
+        console.log(featuresPromise);
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     };
     // 立体向上泛光效果
     const wllUp = () => {
@@ -333,9 +650,9 @@ export default defineComponent({
       };
       const height = 430;
       tilesetBaimo = new Cesium.Cesium3DTileset(tilesetJson);
+
       tilesetBaimo.readyPromise
         .then(function (tileset) {
-          viewer.scene.primitives.add(tileset, 1);
           // 白膜高度抬升
           var boundingSphere = tileset.boundingSphere;
           var cartographic = Cesium.Cartographic.fromCartesian(
@@ -404,6 +721,7 @@ export default defineComponent({
       //   });
 
       //升级Cesium到1.106.1版本后更改着色器代码
+      // _fragmentShaderSource里的position.z泛光从下到上  position.y从左到右
       tilesetBaimo.tileVisible.addEventListener(function (res) {
         let content = res.content;
         let featuresLength = content.featuresLength;
@@ -450,16 +768,16 @@ export default defineComponent({
 								float stepY = model_textureStep.z;
 								float centerY = model_textureStep.w;
 
-								float xId = mod(featureId, model_textureDimensions.x); 
+								float xId = mod(featureId, model_textureDimensions.x);
 								float yId = floor(featureId / model_textureDimensions.x);
-								
+
 								return vec2(centerX + (xId * stepX), centerY + (yId * stepY));
 								#else
 								return vec2(centerX + (featureId * stepX), 0.5);
 								#endif
 							}
 							void selectedFeatureIdStage(out SelectedFeature feature, FeatureIds featureIds)
-							{   
+							{
 								int featureId = featureIds.SELECTED_FEATURE_ID;
 								if (featureId < model_featuresLength)
 								{
@@ -487,36 +805,203 @@ export default defineComponent({
 							SelectedFeature selectedFeature;
 							void main(){
 								vec4 position = czm_inverseModelView * vec4(v_positionEC,1.);//获取模型的世界坐标
-								float buildMaxHeight = 100.0;//建筑群最高高度 配渐变色
+								float buildMaxHeight = 30.0;//建筑群最高高度 配渐变色
 								fragColor = ${color};//赋予基础底色
-								fragColor *= vec4(vec3(position.y / buildMaxHeight ), 1.0);//根据楼层高度比例渲染渐变色
+								fragColor *= vec4(vec3(position.z / buildMaxHeight ), 1.0);//根据楼层高度比例渲染渐变色
 								float time = abs(fract(czm_frameNumber / 360.0)-0.5)*2.;//动画频率 约束在(0,1) 更改频率修改360.0
-								float diffuse = step(0.005, abs(clamp(position.y / buildMaxHeight, 0.0, 1.0) - time));//根据帧数变化,光圈颜色白色,由底部朝上一丢丢(0.05)开始逐渐上移显现.
+								float diffuse = step(0.005, abs(clamp(position.z / buildMaxHeight, 0.0, 1.0) - time));//根据帧数变化,光圈颜色白色,由底部朝上一丢丢(0.05)开始逐渐上移显现.
 								fragColor.rgb += fragColor.rgb * (1.0 - diffuse );//单纯叠加颜色 感兴趣的可以mix混合下
 							}
 						`;
           }
         }
       });
+      viewer.scene.primitives.add(tilesetBaimo);
       viewer.flyTo(tilesetBaimo);
+    };
+    const BAIMOEditWay2 = () => {
+      const { viewer } = store.state;
+      viewer.scene.globe.depthTestAgainstTerrain = true; // 开启地形深度探测
+      // 异步加载
+      const height = 430;
+      tilesetBaimo = new Cesium.Cesium3DTileset({
+        // url: DAYANTA3DTILES,
+        url: BAIMO3DTILES,
+        minimumPixelSize: 128,
+        customShader: new Cesium.CustomShader({
+          lightingModel: Cesium.LightingModel.UNLIT,
+          fragmentShaderText: `
+			void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
+				float _baseHeight = 0.0; // 物体的基础高度，需要修改成一个合适的建筑基础高度
+				float _heightRange = 60.0; // 高亮的范围(_baseHeight ~ _baseHeight + _      heightRange) 默认是 0-60米
+				float _glowRange = 300.0; // 光环的移动范围(高度)
+			    float vtxf_height = fsInput.attributes.positionMC.z-_baseHeight;
+			    float vtxf_a11 = fract(czm_frameNumber / 120.0) * 3.14159265 * 2.0;
+			    float vtxf_a12 = vtxf_height / _heightRange + sin(vtxf_a11) * 0.1;
+			    material.diffuse*= vec3(vtxf_a12, vtxf_a12, vtxf_a12);
+			    float vtxf_a13 = fract(czm_frameNumber / 360.0);
+			    float vtxf_h = clamp(vtxf_height / _glowRange, 0.0, 1.0);
+			    vtxf_a13 = abs(vtxf_a13 - 0.5) * 2.0;
+			    float vtxf_diff = step(0.005, abs(vtxf_h - vtxf_a13));
+			    material.diffuse += material.diffuse * (1.0 - vtxf_diff);
+			}	 	
+			`,
+        }),
+        // enableModelExperimental: true,
+      });
+      tilesetBaimo.readyPromise
+        .then(function (tileset) {
+          tileset.style = new Cesium.Cesium3DTileStyle({
+            color: {
+              conditions: [["true", "color('rgb(51, 153, 255)',1)"]],
+            },
+          });
+          // 白膜高度抬升
+          var boundingSphere = tileset.boundingSphere;
+          var cartographic = Cesium.Cartographic.fromCartesian(
+            boundingSphere.center
+          );
+          var surface = Cesium.Cartesian3.fromRadians(
+            cartographic.longitude,
+            cartographic.latitude,
+            0.0
+          );
+          var offset = Cesium.Cartesian3.fromRadians(
+            cartographic.longitude,
+            cartographic.latitude,
+            height
+          );
+          const translation = Cesium.Cartesian3.subtract(
+            offset,
+            surface,
+            new Cesium.Cartesian3()
+          );
+          tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      viewer.scene.primitives.add(tilesetBaimo);
+      viewer.flyTo(tilesetBaimo);
+      let pickEntity = new InfoTool(viewer);
+      handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+      let pickedObject;
+      handler.setInputAction(function (movement) {
+        let scene = viewer.scene;
+        // 判断场景的模式，不能是 变形模式
+        if (scene.mode !== Cesium.SceneMode.MORPHING) {
+          // scene.pick: 返回scene中指定位置的顶端的primitive属性的一个对象
+          pickedObject = scene.pick(movement.position);
+          // 判断是否拾取到模型
+          if (
+            scene.pickPositionSupported &&
+            Cesium.defined(pickedObject)
+          ) {
+            let cartesian = viewer.scene.pickPosition(movement.position);
+            // 是否获取到空间坐标
+            if (Cesium.defined(cartesian)) {
+              // // 空间坐标转世界坐标(弧度)
+              let cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+              // 弧度转为角度（经纬度）
+              let lon = Cesium.Math.toDegrees(cartographic.longitude);
+              let lat = Cesium.Math.toDegrees(cartographic.latitude);
+              //模型高度
+              let height = cartographic.height;
+              pickedObject.pos = Cesium.Cartesian3.fromDegrees(lon, lat, height);
+              console.log("模型表面的经纬度高程是：", {
+                x: lon,
+                y: lat,
+                height: height,
+              });
+            }
+          }
+        }
+
+        let pick = viewer.scene.pick(movement.position);
+        if (Cesium.defined(pick)) {
+          pick.pos = pickedObject.pos;
+          console.log(pick);
+          pickEntity.add(pick);
+        } else {
+        }
+
+        const pickRay = viewer.camera.getPickRay(movement.position);
+        const featuresPromise = viewer.imageryLayers.pickImageryLayerFeatures(
+          pickRay,
+          viewer.scene
+        );
+        console.log(featuresPromise);
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+      // tilesetBaimo.tileVisible.addEventListener(function (res) {
+      //   let content = res.content;
+      //   let featuresLength = content.featuresLength;
+      //   for (let i = 0; i < featuresLength; i += 2) {
+      //     let feature = content.getFeature(i);
+      //     let model = feature.content._model;
+      //     if (model) {
+      //       console.log(model);
+      //       pickEntity.add(model);
+      //     }
+      //   }
+      // });
     };
     /* Cesium修改地图颜色代码(暗色电子地图) */
     const modifyMap = () => {
       const { viewer } = store.state;
-      // 获取地图影像图层
-      const baseLayer = viewer.imageryLayers.get(0);
-      // 设置两个变量，用来判断是否进行颜色的翻转和过滤
-      const options = {
+      // // 获取地图影像图层
+      // const baseLayer = viewer.imageryLayers.get(0);
+      // // 设置两个变量，用来判断是否进行颜色的翻转和过滤
+      // const options = {
+      //   invertColor: true,
+      //   filterRGB: [0, 50, 100],
+      // };
+      // // 更改地图着色器代码
+      // const baseFragShader =
+      //   viewer.scene.globe._surfaceShaderSet.baseFragmentShaderSource.sources;
+      // for (let i = 0; i < baseFragShader.length; i++) {
+      //   // console.log(baseFragShader[i])
+      //   // console.log('------')
+
+      //   const strS =
+      //     "color = czm_saturation(color, textureSaturation);\n#endif\n";
+      //   let strT =
+      //     "color = czm_saturation(color, textureSaturation);\n#endif\n";
+      //   if (options.invertColor) {
+      //     strT += `
+      // color.r = 1.0 - color.r;
+      // color.g = 1.0 - color.g;
+      // color.b = 1.0 - color.b;
+      // `;
+      //   }
+      //   if (options.filterRGB.length > 0) {
+      //     strT += `
+      // color.r = color.r * ${options.filterRGB[0]}.0/255.0;
+      // color.g = color.g * ${options.filterRGB[1]}.0/255.0;
+      // color.b = color.b * ${options.filterRGB[2]}.0/255.0;
+      // `;
+      //   }
+      //   baseFragShader[i] = baseFragShader[i].replace(strS, strT);
+      // }
+
+      let options = {
+        //反色?
         invertColor: true,
-        filterRGB: [0, 50, 100],
+        //滤镜值
+        filterRGB: [60, 145, 172],
       };
-      // 更改地图着色器代码
+      DarkMap(viewer, options);
+    };
+    const DarkMap = (viewer, options) => {
+      const baseLayer = viewer.imageryLayers.get(0);
+      //以下几个参数根据实际情况修改,目前我是参照火星科技的参数,个人感觉效果还不错
+      baseLayer.brightness = options.brightness || 0.6;
+      baseLayer.contrast = options.contrast || 1.8;
+      baseLayer.gamma = options.gamma || 0.3;
+      baseLayer.hue = options.hue || 1;
+      baseLayer.saturation = options.saturation || 0;
       const baseFragShader =
         viewer.scene.globe._surfaceShaderSet.baseFragmentShaderSource.sources;
       for (let i = 0; i < baseFragShader.length; i++) {
-        // console.log(baseFragShader[i])
-        // console.log('------')
-
         const strS =
           "color = czm_saturation(color, textureSaturation);\n#endif\n";
         let strT =
@@ -538,10 +1023,99 @@ export default defineComponent({
         baseFragShader[i] = baseFragShader[i].replace(strS, strT);
       }
     };
+    // 图层里添加天地图电子地图
+    const addTiandituMap = () => {
+      const { viewer } = store.state;
+      viewer.scene.screenSpaceCameraController.enableCollisionDetection = true; //相机与地形的碰撞检测
+      viewer.scene.globe.depthTestAgainstTerrain = true; //Cesium开启地形检测,默认为false
+      imageryProvider = createTdtImageryProvider({
+        layer: "vec",
+        // appKey: "你的天地图AppKey",
+        appKey: "edd63cb6efda66a59e9d4d6f30b0a92c",
+      });
+      //接下来我们就要对这个图层进行处理
+      layer = viewer.imageryLayers.addImageryProvider(imageryProvider);
+      //调用影响中文注记服务
+      //标注
+      let TDT_CIA_C =
+        "http://{s}.tianditu.gov.cn/cia_c/wmts?service=wmts&request=GetTile&version=1.0.0" +
+        "&LAYER=cia&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}" +
+        "&style=default&format=tiles&tk=edd63cb6efda66a59e9d4d6f30b0a92c";
+      viewer.imageryLayers.addImageryProvider(
+        new Cesium.WebMapTileServiceImageryProvider({
+          url: TDT_CIA_C,
+          layer: "tdtImg_c",
+          style: "default",
+          format: "tiles",
+          tileMatrixSetID: "c",
+          subdomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"],
+          tilingScheme: new Cesium.GeographicTilingScheme(),
+          tileMatrixLabels: [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+          ],
+          maximumLevel: 50,
+          show: false,
+        })
+      );
+    };
+    // 加载天地图
+    const createTdtImageryProvider = (params) => {
+      var tileMatrixSet = "w";
+      var host = params.host || "http://t{s}.tianditu.com/";
+      var subdomains = ["0", "1", "2", "3", "4", "5", "6", "7"];
+
+      if (host[host.length - 1] == "/") {
+        host = host.substr(0, host.length - 1);
+      }
+      var url =
+        host +
+        "/" +
+        params.layer +
+        "_" +
+        tileMatrixSet +
+        "/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=" +
+        params.layer +
+        "&tileMatrixSet=" +
+        tileMatrixSet +
+        "&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles";
+      url += "&tk=" + params.appKey;
+
+      let provider = new Cesium.WebMapTileServiceImageryProvider({
+        url: url,
+        layer: params.layer,
+        style: "default",
+        subdomains: subdomains,
+        tileMatrixSetID: tileMatrixSet,
+        maximumLevel: params.maximumLevel || 18,
+        minimumLevel: params.minimumLevel,
+      });
+
+      return provider;
+    };
     const handleClear = () => {
       const { viewer } = store.state;
     };
-    onMounted(() => {});
+    onMounted(() => {
+      addTiandituMap();
+    });
     onUnmounted(() => {
       handleClear();
     });
@@ -551,9 +1125,15 @@ export default defineComponent({
       wallCustom,
       modifyMap,
       BAIMOEdit,
+      BAIMOEditWay2,
       boolInside,
       dragEntity,
       cancelDragEntity,
+      addTetrahedronPrimitive,
+      addPyramidGeometry,
+      add3DTiles,
+      add3DTilesSnow,
+      BAIMOLight,
     };
   },
 });
@@ -593,46 +1173,5 @@ export default defineComponent({
 }
 #creditContainer {
   display: none;
-}
-.panel_view {
-  position: absolute;
-  top: 500px;
-  right: 100px;
-  z-index: 200;
-  width: 200px;
-  height: 100px;
-  background: rgba(0, 255, 255, 0.7);
-  border: 1px solid #529dd6;
-  border-radius: 5px;
-}
-.volume-main {
-  line-height: 26px;
-  padding: 0 10px;
-}
-.volume-main li {
-  list-style-type: none;
-}
-.volume-clear {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px dashed;
-  color: #ffffff;
-  padding-bottom: 6px;
-}
-.volume-color {
-  display: flex;
-  align-content: center;
-  justify-content: space-between;
-}
-.volume-clear span {
-  cursor: pointer;
-}
-.volume-item {
-  margin-top: 8px;
-}
-.volume-color {
-  display: flex;
-  align-content: center;
-  justify-content: space-between;
 }
 </style>
