@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-02 15:01:51
+ * @LastEditTime: 2023-08-23 17:03:13
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -32,7 +32,7 @@ import {
 import { useStore } from "vuex";
 import { DAYANTA3DTILES, BAIMO3DTILES } from "@/components/commonJS/config";
 import { getGeojson } from "@/api/api.js";
-import createEdgeStage from "./CesiumEdgeStage/createEdgeStage1.102";
+import createEdgeStage from "./CesiumEdgeStage/createEdgeStage.js";
 import CesiumContainer from "@/views/CesiumContainer.vue";
 
 export default defineComponent({
@@ -234,93 +234,95 @@ export default defineComponent({
 
           // 没有_model._sourcePrograms的方法
           let model = feature.content._model;
-          if (model && model._pipelineResources) {
-            let program = model._pipelineResources[1];
-            const color = `vec4(0,127.5/255.,1.,1.)`;
-            program._fragmentShaderSource.sources[0] = `
-                            #version 300 es;
-							uniform vec2 model_iblFactor;
-							uniform mat3 model_iblReferenceFrameMatrix;
-							uniform float model_luminanceAtZenith;
-							uniform float u_metallicFactor;
-							uniform float u_roughnessFactor;
-							uniform int model_featuresLength;
-							uniform sampler2D model_batchTexture;
-							uniform vec4 model_textureStep;
-							uniform float model_colorBlend;
-							uniform bool model_commandTranslucent;
-							uniform sampler2D model_pickTexture;
-							in vec3 v_positionWC;
-							in vec3 v_positionEC;
-							in vec3 v_normalEC;
-							in vec3 v_positionMC;
-							in float v_featureId_0;
-							struct SelectedFeature
-							{
-								int id;
-								vec2 st;
-								vec4 color;
-							};
-							struct FeatureIds
-							{
-								int featureId_0;
-							};
-							vec2 computeSt(float featureId)
-							{
-								float stepX = model_textureStep.x;
-								float centerX = model_textureStep.y;
+          // if (model && model._pipelineResources) {
+          //   let program = model._pipelineResources[1];
+          //   const color = `vec4(0,127.5/255.,1.,1.)`;
+          //   program._fragmentShaderSource.sources[0] = `
+          //                   #version 300 es;
+					// 		uniform vec2 model_iblFactor;
+					// 		uniform mat3 model_iblReferenceFrameMatrix;
+					// 		uniform float model_luminanceAtZenith;
+					// 		uniform float u_metallicFactor;
+					// 		uniform float u_roughnessFactor;
+					// 		uniform int model_featuresLength;
+					// 		uniform sampler2D model_batchTexture;
+					// 		uniform vec4 model_textureStep;
+					// 		uniform float model_colorBlend;
+					// 		uniform bool model_commandTranslucent;
+					// 		uniform sampler2D model_pickTexture;
+					// 		in vec3 v_positionWC;
+					// 		in vec3 v_positionEC;
+					// 		in vec3 v_normalEC;
+					// 		in vec3 v_positionMC;
+					// 		in float v_featureId_0;
+          //     layout(location = 0) out vec4 fragColor;
+          //     // out vec4 fragColor;
+					// 		struct SelectedFeature
+					// 		{
+					// 			int id;
+					// 			vec2 st;
+					// 			vec4 color;
+					// 		};
+					// 		struct FeatureIds
+					// 		{
+					// 			int featureId_0;
+					// 		};
+					// 		vec2 computeSt(float featureId)
+					// 		{
+					// 			float stepX = model_textureStep.x;
+					// 			float centerX = model_textureStep.y;
 
-								#ifdef MULTILINE_BATCH_TEXTURE
-								float stepY = model_textureStep.z;
-								float centerY = model_textureStep.w;
+					// 			#ifdef MULTILINE_BATCH_TEXTURE
+					// 			float stepY = model_textureStep.z;
+					// 			float centerY = model_textureStep.w;
 
-								float xId = mod(featureId, model_textureDimensions.x); 
-								float yId = floor(featureId / model_textureDimensions.x);
+					// 			float xId = mod(featureId, model_textureDimensions.x); 
+					// 			float yId = floor(featureId / model_textureDimensions.x);
 								
-								return vec2(centerX + (xId * stepX), centerY + (yId * stepY));
-								#else
-								return vec2(centerX + (featureId * stepX), 0.5);
-								#endif
-							}
-							void selectedFeatureIdStage(out SelectedFeature feature, FeatureIds featureIds)
-							{   
-								int featureId = featureIds.SELECTED_FEATURE_ID;
-								if (featureId < model_featuresLength)
-								{
-									vec2 featureSt = computeSt(float(featureId));
+					// 			return vec2(centerX + (xId * stepX), centerY + (yId * stepY));
+					// 			#else
+					// 			return vec2(centerX + (featureId * stepX), 0.5);
+					// 			#endif
+					// 		}
+					// 		void selectedFeatureIdStage(out SelectedFeature feature, FeatureIds featureIds)
+					// 		{   
+					// 			int featureId = featureIds.SELECTED_FEATURE_ID;
+					// 			if (featureId < model_featuresLength)
+					// 			{
+					// 				vec2 featureSt = computeSt(float(featureId));
 
-									feature.id = featureId;
-									feature.st = featureSt;
-									feature.color = texture(model_batchTexture, featureSt);
-								}
-								else
-								{
-									feature.id = model_featuresLength + 1;
-									feature.st = vec2(0.0);
-									feature.color = vec4(1.0);
-								}
+					// 				feature.id = featureId;
+					// 				feature.st = featureSt;
+					// 				feature.color = texture(model_batchTexture, featureSt);
+					// 			}
+					// 			else
+					// 			{
+					// 				feature.id = model_featuresLength + 1;
+					// 				feature.st = vec2(0.0);
+					// 				feature.color = vec4(1.0);
+					// 			}
 
-								#ifdef HAS_NULL_FEATURE_ID
-								if (featureId == model_nullFeatureId) {
-									feature.id = featureId;
-									feature.st = vec2(0.0);
-									feature.color = vec4(1.0);
-								}
-								#endif
-							}
-							SelectedFeature selectedFeature;
-							void main(){
-								vec4 position = czm_inverseModelView * vec4(v_positionEC,1.);//获取模型的世界坐标
-								float buildMaxHeight = 300.0;//建筑群最高高度 配渐变色
-								vec4 ourColor = ${color};//赋予基础底色
-								ourColor *= vec4(vec3(position.y / buildMaxHeight ), 1.0);//根据楼层高度比例渲染渐变色
-								float time = abs(fract(czm_frameNumber / 360.0)-0.5)*2.;//动画频率 约束在(0,1) 更改频率修改360.0
-								float diffuse = step(0.005, abs(clamp(position.y / buildMaxHeight, 0.0, 1.0) - time));//根据帧数变化,光圈颜色白色,由底部朝上一丢丢(0.05)开始逐渐上移显现.
-								ourColor.rgb += ourColor.rgb * (1.0 - diffuse );//单纯叠加颜色 感兴趣的可以mix混合下
-                                out_FragColor = ourColor;
-                            }
-						`;
-          }
+					// 			#ifdef HAS_NULL_FEATURE_ID
+					// 			if (featureId == model_nullFeatureId) {
+					// 				feature.id = featureId;
+					// 				feature.st = vec2(0.0);
+					// 				feature.color = vec4(1.0);
+					// 			}
+					// 			#endif
+					// 		}
+					// 		SelectedFeature selectedFeature;
+					// 		void main(){
+					// 			vec4 position = czm_inverseModelView * vec4(v_positionEC,1.);//获取模型的世界坐标
+					// 			float buildMaxHeight = 300.0;//建筑群最高高度 配渐变色
+					// 			vec4 ourColor = ${color};//赋予基础底色
+					// 			ourColor *= vec4(vec3(position.y / buildMaxHeight ), 1.0);//根据楼层高度比例渲染渐变色
+					// 			float time = abs(fract(czm_frameNumber / 360.0)-0.5)*2.;//动画频率 约束在(0,1) 更改频率修改360.0
+					// 			float diffuse = step(0.005, abs(clamp(position.y / buildMaxHeight, 0.0, 1.0) - time));//根据帧数变化,光圈颜色白色,由底部朝上一丢丢(0.05)开始逐渐上移显现.
+					// 			ourColor.rgb += ourColor.rgb * (1.0 - diffuse );//单纯叠加颜色 感兴趣的可以mix混合下
+          //       fragColor = ourColor;
+          //                   }
+					// 	`;
+          // }
         }
       });
       viewer.flyTo(tilesetBaimo);

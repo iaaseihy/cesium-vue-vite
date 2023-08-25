@@ -71,8 +71,9 @@ class InfoTool {
             // 设置元素效果
             util.setCss(element, "opacity", "1");
             util.setCss(element.querySelector("div:nth-child(1)"), "transition", "ease 1s");
+            util.setCss(element.querySelector("div:nth-child(3)"), "transition", "ease 1s");
             util.setCss(element.querySelector("div:nth-child(2)"), "transition", "opacity 1s");
-            util.setCss(element.querySelector("div:nth-child(2)"), "transition", "opacity 1s");
+            util.setCss(element.querySelector("div:nth-child(3)"), "transition", "opacity 1s");
             util.setCss(element.querySelector("div:nth-child(1)"), "height", "80px");
             util.setCss(element.querySelector("div:nth-child(2)"), "pointer-events", "auto");
             window.setTimeout(function () {
@@ -105,7 +106,7 @@ class InfoTool {
                 util.setCss(element, "top", parseInt(canvasPosition.y + offset[1]) + "px");
                 util.setCss(element, "z-index", parseInt(100));
 
-                
+
 
                 // 是否在地球背面隐藏
                 if (hideOnBehindGlobe) {
@@ -226,7 +227,19 @@ class InfoTool {
             }
         } else {
             // options.content && (info = options.content);
-            options.content && (info = options.pos);
+            // options.content && (info = options.pos);
+            let content = options.content;
+            let featuresLength = content.featuresLength;
+            console.log("要素数量为：");
+            console.log(featuresLength);
+            console.log("第一个要素属性为：");
+            let feature = content.getFeature(0).getProperty("name");
+            console.log(feature);
+            if (feature) {
+                info = feature;
+            } else {
+                info = options.pos
+            }
         }
 
         // 2.生成特效
@@ -267,6 +280,19 @@ class InfoTool {
         util.setCss(this.#element.querySelector("div:nth-child(3)"), "transition", "");
         util.setCss(this.#element.querySelector("div:nth-child(1)"), "height", "0");
         util.setCss(this.#element.querySelector("div:nth-child(2)"), "pointer-events", "none");
+    };
+
+    removeElement(entityId = undefined) {
+        util.setCss(this.#element, "opacity", "0");
+        util.setCss(this.#element.querySelector("div:nth-child(1)"), "transition", "");
+        util.setCss(this.#element.querySelector("div:nth-child(2)"), "transition", "");
+        util.setCss(this.#element.querySelector("div:nth-child(3)"), "transition", "");
+        util.setCss(this.#element.querySelector("div:nth-child(1)"), "height", "0");
+        util.setCss(this.#element.querySelector("div:nth-child(2)"), "pointer-events", "none");
+        let element = document.getElementsByClassName('helsing-three-plugins-infotool');
+        if (element) {
+            this.#element.classList.remove("helsing-three-plugins-infotool");
+        }
     };
 }
 

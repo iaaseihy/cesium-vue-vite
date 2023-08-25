@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-14 13:42:58
+ * @LastEditTime: 2023-08-23 11:33:55
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -278,6 +278,15 @@ const routes = [
         meta: {
           title: "动态立体墙",
           activePath: "/cesium/dynamicWall",
+        },
+      },
+      {
+        path: '/unrealBloom',
+        name: 'UnrealBloom',
+        component: () => import('@/components/views/cesium/unrealBloom/unrealBloom.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "UnrealBloom泛光",
+          activePath: "/cesium/unrealBloom",
         },
       },
       {

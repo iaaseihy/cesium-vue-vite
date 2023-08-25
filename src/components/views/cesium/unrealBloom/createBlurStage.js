@@ -2,20 +2,19 @@
  * @Descripttion: 
  * @version: v1.0
  * @Author: CaoChaoqiang
- * @Date: 2023-05-31 17:43:51
+ * @Date: 2023-08-23 11:44:51
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-23 14:45:36
+ * @LastEditTime: 2023-08-25 14:07:34
  */
-import * as Cesium from "cesium";
-import { parseDefines } from './parseDefines.js';
 
+import { parseDefines } from './parseDefines.js';
+import * as Cesium from 'cesium';
 const _shadersSeparableBlur = "\n\
 in vec2 v_textureCoordinates;\n\
 uniform sampler2D colorTexture;\n\
 uniform vec2 colorTextureDimensions;\n\
 uniform vec2 direction;\n\
 uniform float kernelRadius;\n\
-out vec4 outFragColor;\n\
 \n\
 float gaussianPdf(in float x, in float sigma) {\n\
     return 0.39894 * exp( -0.5 * x * x/( sigma * sigma))/sigma;\n\
@@ -35,8 +34,7 @@ void main() {\
         weightSum += (2.0 * w);\
         uvOffset += delta;\
     }\
-    vec4 fragColor = diffuseSum/weightSum;\
-    outFragColor = fragColor;\
+    out_FragColor = diffuseSum/weightSum;\
 }";
 
 /**

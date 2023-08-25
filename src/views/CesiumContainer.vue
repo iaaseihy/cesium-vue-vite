@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: liubofang<421419567@qq.com>
  * @Date: 2021-06-15 15:08:22
- * @LastEditTime: 2023-08-16 16:15:08
+ * @LastEditTime: 2023-08-24 14:34:16
 -->
 <template>
   <div id="cesiumContainer">
@@ -223,9 +223,9 @@ export default {
       viewer.scene.globe.depthTestAgainstTerrain = false;
 
       // 添加3d tiles调试面板
-      viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
-      var inspectorViewModel = viewer.cesium3DTilesInspector.viewModel;
-      console.log("inspectorViewModel: ", inspectorViewModel);
+      // viewer.extend(Cesium.viewerCesium3DTilesInspectorMixin);
+      // var inspectorViewModel = viewer.cesium3DTilesInspector.viewModel;
+      // console.log("inspectorViewModel: ", inspectorViewModel);
 
       const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
       // g跟随鼠标获取经纬度和海拔

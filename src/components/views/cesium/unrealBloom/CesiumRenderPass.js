@@ -1,5 +1,5 @@
-import * as Cesium from "cesium";
 
+import * as Cesium from 'cesium';
 function executeDerivedCommand(command, nameDerived, commandName, scene, context, passState) {
     const defined = Cesium.defined
     var frameState = scene._frameState;
@@ -46,7 +46,7 @@ export function executeDerivedCommandList(context, targetFramebuffer, passState,
         numFrustums = frustumCommandsList.length;
 
     var globeTranslucencyState = scene._globeTranslucencyState;
-    var globeTranslucent = globeTranslucencyState.translucent;
+    // var globeTranslucent = globeTranslucencyState.translucent;
 
     // Create a working frustum from the original camera frustum.
     var frustum;
@@ -100,22 +100,22 @@ export function executeDerivedCommandList(context, targetFramebuffer, passState,
         commands = frustumCommands.commands[Pass.GLOBE];
         length = frustumCommands.indices[Pass.GLOBE];
 
-        if (globeTranslucent) {
-            globeTranslucencyState.executeGlobeCommands(
-                frustumCommands,
-                executeCommand,
-                globeTranslucencyFramebuffer,
-                scene,
-                passState
-            );
-        } else {
-            for (j = 0; j < length; ++j) {
-                executeCommand(commands[j], scene, context, passState);
-            }
-        }
-        // for (j = 0; j < length; ++j) {
-        //     executeCommand(commands[j], scene, context, passState);
+        // if (globeTranslucent) {
+        //     globeTranslucencyState.executeGlobeCommands(
+        //         frustumCommands,
+        //         executeCommand,
+        //         globeTranslucencyFramebuffer,
+        //         scene,
+        //         passState
+        //     );
+        // } else {
+        //     for (j = 0; j < length; ++j) {
+        //         executeCommand(commands[j], scene, context, passState);
+        //     }
         // }
+        for (j = 0; j < length; ++j) {
+            executeCommand(commands[j], scene, context, passState);
+        }
 
         // if (clearGlobeDepth) {
         //     clearDepth.framebuffer = passState.framebuffer;
@@ -309,9 +309,9 @@ export default function CesiumRenderPass(options) {
 
             var czm_selectedFS = cmz_selected_glsl;
             var is3dtiles = /texture\s?\(\s?tile_pickTexture\s?,\s?tile_featureSt\s?\)/.test(pickId)
-            if (pickIdQualifier == 'uniform' && !is3dtiles) {
+            if (pickIdQualifier == 'varying' && !is3dtiles) {
                 czm_selectedFS += `
-float me_isSelected;
+                layout(location = 6) out float me_isSelected;
 bool czm_selected(){
     bool isSelected= me_isSelected>0.0000001;
     if(!isSelected){
@@ -330,7 +330,7 @@ bool czm_selected(){
 
             let czm_selectedVS = cmz_selected_glsl +
                 `
-float me_isSelected;
+                out float me_isSelected;
 bool czm_selected(){
     return czm_selected(${pickId});
 }
@@ -396,7 +396,7 @@ bool czm_selected(){
                     }
                 }
 
-                hasSelected = hasSelected && pickIdQualifier == 'in' && !is3dtiles;
+                hasSelected = hasSelected && pickIdQualifier == 'varying' && !is3dtiles;
 
                 if (hasNormal) {
                     vs.defines.push('HAS_NORMAL')
@@ -489,7 +489,7 @@ bool czm_selected(){
 
         if (!defined(shader) || result.shaderProgramId !== command.shaderProgram.id) {
             let originalSp = command.shaderProgram
-            let pickIdQualifier = originalCommand._pickIdQualifier = new RegExp(`uniform\\s?vec4\\s?${command.pickId}`, 'g').test(originalSp._fragmentShaderText) ? 'uniform' : 'in'
+            let pickIdQualifier = originalCommand._pickIdQualifier = new RegExp(`uniform\\s?vec4\\s?${command.pickId}`, 'g').test(originalSp._fragmentShaderText) ? 'uniform' : 'varying'
 
             result[commandName].shaderProgram = getShaderProgram(
                 context,

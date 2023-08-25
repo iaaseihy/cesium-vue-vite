@@ -9,6 +9,7 @@ uniform sampler2D colorTexture;\n\
 uniform vec2 colorTextureDimensions;\n\
 uniform vec2 direction;\n\
 uniform float kernelRadius;\n\
+out vec4 outFragColor;\n\
 \n\
 float gaussianPdf(in float x, in float sigma) {\n\
     return 0.39894 * exp( -0.5 * x * x/( sigma * sigma))/sigma;\n\
@@ -28,7 +29,7 @@ void main() {\
         weightSum += (2.0 * w);\
         uvOffset += delta;\
     }\
-    gl_FragColor = diffuseSum/weightSum;\
+    outFragColor = diffuseSum/weightSum;\
 }";
 
 /**

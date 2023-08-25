@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-22 16:25:53
+ * @LastEditTime: 2023-08-23 10:31:32
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -939,32 +939,32 @@ export default defineComponent({
         let divElement = document.getElementsByClassName(
           "helsing-three-plugins-infotool"
         );
-        let div3 = divElement[0].children[2];
-        if (div3) {
-          // 添加鼠标点击事件监听器
-          // div3.addEventListener("click", (event) => {
-          //   isClicked = true;
-          //   // 在这里编写鼠标点击事件的处理逻辑
-          //   console.log("鼠标点击了div:nth-child(3)");
-          // });
-          div3.onclick = function () {
-            console.log("鼠标点击了div:nth-child(3)");
-            windowClose();
-          };
+        if (divElement && divElement.length > 0) {
+          let div3 = divElement[0].children[2];
+          if (div3) {
+            // 添加鼠标点击事件监听器
+            // div3.addEventListener("click", (event) => {
+            //   isClicked = true;
+            //   // 在这里编写鼠标点击事件的处理逻辑
+            //   console.log("鼠标点击了div:nth-child(3)");
+            // });
+            div3.onclick = function () {
+              console.log("鼠标点击了div:nth-child(3)");
+              windowClose();
+            };
+          }
         }
+
+        // tilesetBaimo.tileLoad.addEventListener(function (tile) {
+        //   let content = tile.content;
+        //   let featuresLength = content.featuresLength;
+        //   console.log("要素数量为：");
+        //   console.log(featuresLength);
+        //   console.log("第一个要素属性为：");
+        //   let feature = content.getFeature(0).getProperty("name");
+        //   console.log(feature);
+        // });
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-      // tilesetBaimo.tileVisible.addEventListener(function (res) {
-      //   let content = res.content;
-      //   let featuresLength = content.featuresLength;
-      //   for (let i = 0; i < featuresLength; i += 2) {
-      //     let feature = content.getFeature(i);
-      //     let model = feature.content._model;
-      //     if (model) {
-      //       console.log(model);
-      //       pickEntity.add(model);
-      //     }
-      //   }
-      // });
     };
     //关闭
     const windowClose = () => {
@@ -972,6 +972,7 @@ export default defineComponent({
       if (pickEntity) {
         pickEntity.remove();
       }
+      handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
     };
     /* Cesium修改地图颜色代码(暗色电子地图) */
     const modifyMap = () => {
