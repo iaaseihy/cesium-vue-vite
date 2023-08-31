@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-23 11:33:55
+ * @LastEditTime: 2023-08-31 14:10:39
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -287,6 +287,33 @@ const routes = [
         meta: {
           title: "UnrealBloom泛光",
           activePath: "/cesium/unrealBloom",
+        },
+      },
+      {
+        path: '/texture3D',
+        name: 'Texture3D',
+        component: () => import('@/components/views/cesium/texture3D/texture3D.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "体渲染",
+          activePath: "/cesium/texture3D",
+        },
+      },
+      {
+        path: '/subMerged',
+        name: 'subMerged',
+        component: () => import('@/components/views/cesium/subMerged/subMerged.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "淹没分析",
+          activePath: "/cesium/subMerged",
+        },
+      },
+      {
+        path: '/dam',
+        name: 'dam',
+        component: () => import('@/components/views/cesium/dam/layout/layout.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "大坝",
+          activePath: "/cesium/dam",
         },
       },
       {
