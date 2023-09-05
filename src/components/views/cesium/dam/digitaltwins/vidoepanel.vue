@@ -1,11 +1,4 @@
-<!--
- * @Author: 王建博 wangjianbo@automic.com.cn
- * @Date: 2022-08-15 17:01:12
- * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-30 15:31:20
- * @FilePath: \demo\src\components\digitaltwins\vidoepanel.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
+
 <template>
     <div class="videopanel">
         <div class="firstvideo">

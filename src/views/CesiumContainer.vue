@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: liubofang<421419567@qq.com>
  * @Date: 2021-06-15 15:08:22
- * @LastEditTime: 2023-08-29 14:37:27
+ * @LastEditTime: 2023-09-01 10:44:02
 -->
 <template>
   <div id="cesiumContainer">
@@ -131,6 +131,7 @@ export default {
         sceneModePicker: false,
         timeline: false,
         animation: false,
+        shouldAnimate: true,
         selectionIndicator: false,
         infoBox: false,
       });

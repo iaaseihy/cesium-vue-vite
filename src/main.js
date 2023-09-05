@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-04-07 14:35:28
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-30 14:38:17
+ * @LastEditTime: 2023-09-04 17:55:31
  */
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from "vue-router";
@@ -19,6 +19,8 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 // import * as h337 from 'heatmap.js'
 //引入turf.js
 import * as turf from '@turf/turf'
+// 引入icofont
+import './lib/iconfont/iconfont.css';
 
 // import * as Three from '@types/three';
 const router = createRouter({

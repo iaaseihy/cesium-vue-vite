@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion: 
+ * @version: v1.0
+ * @Author: CaoChaoqiang
+ * @Date: 2023-08-31 14:13:57
+ * @LastEditors: CaoChaoqiang
+ * @LastEditTime: 2023-09-04 17:36:58
+-->
 <template>
     <div class="slider" ref="mySlider">
         <div class="left-btn" :class="{active:myPosition.isBtn==2}"></div>

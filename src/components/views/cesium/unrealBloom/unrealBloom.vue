@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-25 14:40:14
+ * @LastEditTime: 2023-09-05 14:34:17
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -12,6 +12,8 @@
     <el-button @click="BAIMOEditWay2()">白膜变色2</el-button>
     <el-button @click="modifyMap()">添加暗色电子地图</el-button>
     <el-button @click="unrealBloom()">添加3D描边效果</el-button>
+    <el-button @click="outlineView()">添加全屏红色渐变闪烁告警</el-button>
+    <el-button @click="offOutlineView()">关闭全屏红色渐变闪烁告警</el-button>
   </div>
 </template>
 
@@ -36,7 +38,7 @@ export default defineComponent({
     let entities;
     let entityDrag;
     let imageryProvider;
-    let layer;
+    let redShock;
     let handler;
     let tilesetBaimo = ref < Cesium.Cesium3DTileset > null;
     let pickEntity;
@@ -512,13 +514,22 @@ export default defineComponent({
               }
               `;
       viewer.scene.postProcessStages.add(
-        new Cesium.PostProcessStage({
+        redShock = new Cesium.PostProcessStage({
           fragmentShader: fragmentShaderSource,
         })
       )
     };
+    const offOutlineView = () => {
+      const { viewer } = store.state;
+      console.log(viewer.scene.postProcessStages);
+      // viewer.scene.postProcessStages && viewer.scene.postProcessStages
+      if (redShock) {
+        viewer.scene.postProcessStages.remove(redShock);
+      }
+    };
     const handleClear = () => {
       const { viewer } = store.state;
+      offOutlineView();
     };
     onMounted(() => {
         // outlineView();
@@ -533,6 +544,8 @@ export default defineComponent({
       modifyMap,
       BAIMOEditWay2,
       unrealBloom,
+      outlineView,
+      offOutlineView,
     };
   },
 });

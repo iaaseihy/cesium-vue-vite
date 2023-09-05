@@ -1,11 +1,4 @@
-/*
- * @Author: 王建博 wangjianbo@automic.com.cn
- * @Date: 2022-09-22 15:15:04
- * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-29 17:13:11
- * @FilePath: \gis_3d_gate\src\js\weather.js
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
+
 import * as Cesium from "cesium";
 export function CeateRainEffect(viewer,type){
     var fragmentShader =`uniform sampler2D colorTexture;varying vec2 v_textureCoordinates;uniform float tiltAngle;uniform float rainSize;uniform float rainSpeed;float hash(float x){return fract(sin(x * 133.3) * 13.13);}void main(void) {float time = czm_frameNumber / rainSpeed;vec2 resolution = czm_viewport.zw;vec2 uv = (gl_FragCoord.xy * 2. - resolution.xy) / min(resolution.x, resolution.y);vec3 c = vec3(.6, .7, .8);float a = tiltAngle;float si = sin(a), co = cos(a);uv *= mat2(co, -si, si, co);uv *= length(uv + vec2(0, 4.9)) * rainSize + 1.;float v = 1. - sin(hash(floor(uv.x * 100.)) * 2.);float b = clamp(abs(sin(20. * time * v + uv.y * (5. / (2. + v)))) - .95, 0., 1.) * 20.;c *= v * b;gl_FragColor = mix(texture2D(colorTexture, v_textureCoordinates), vec4(c, 1), .5);}`;

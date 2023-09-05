@@ -1,11 +1,4 @@
-<!--
- * @Author: 王建博 wangjianbo@automic.com.cn
- * @Date: 2022-08-16 13:24:58
- * @LastEditors: 王建博 wangjianbo@automic.com.cn
- * @LastEditTime: 2022-08-16 17:57:58
- * @FilePath: \demo\src\components\digitaltwins\MaxVideopanel.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
+
 <template>
     <div v-show="info._isShow" class="maxvideopanel">
         <div class="btnpanel">{{ info._videoname }}

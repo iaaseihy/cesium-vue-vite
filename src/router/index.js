@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-31 14:10:39
+ * @LastEditTime: 2023-09-01 09:25:41
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -314,6 +314,15 @@ const routes = [
         meta: {
           title: "大坝",
           activePath: "/cesium/dam",
+        },
+      },
+      {
+        path: '/measure',
+        name: 'measure',
+        component: () => import('@/components/views/cesium/measure/measure.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "测量工具",
+          activePath: "/cesium/measure",
         },
       },
       {
