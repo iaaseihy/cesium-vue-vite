@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-23 10:31:32
+ * @LastEditTime: 2023-09-12 17:05:40
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -20,8 +20,9 @@
     <el-button @click="wallCustom()">添加向下泛光墙</el-button>
     <el-button @click="boolInside()">判断点是否在泛光墙内</el-button>
     <el-button @click="BAIMOEdit()">白膜变色(鼠标点击事件报错)</el-button>
-    <el-button @click="BAIMOEditWay2()">白膜变色2</el-button>
+    <el-button @click="BAIMOEditWay2()">白膜变色2(点击白膜点击处生成标签)</el-button>
     <el-button @click="modifyMap()">添加暗色电子地图</el-button>
+    <el-button @click="handleClear()">清空</el-button>
   </div>
 </template>
 
@@ -56,6 +57,7 @@ export default defineComponent({
     let handler;
     let tilesetBaimo = ref < Cesium.Cesium3DTileset > null;
     let pickEntity;
+    let houetteStage;
     let wallPosition1 = Cesium.Cartesian3.fromDegreesArrayHeights([
       104.07263175401185, 30.647622150198725, 1500.0, 104.06369117158526,
       30.648834374000277, 1500.0, 104.06437182811021, 30.62274533905387, 1500.0,
@@ -924,6 +926,7 @@ export default defineComponent({
           pick.pos = pickedObject.pos;
           console.log(pick);
           pickEntity.add(pick);
+          highEntity(pick, viewer);
         } else {
         }
 
@@ -966,6 +969,41 @@ export default defineComponent({
         // });
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     };
+    // 点击模型高亮
+    const highEntity = (pickedFeature, viewer) => {
+  console.log(pickedFeature);
+  if (houetteStage) {
+    viewer.scene.postProcessStages.remove(houetteStage);
+    houetteStage = null;
+  }
+  // 如果支持剪影，则鼠标上方的剪影功能为蓝色，鼠标单击的剪影功能为绿色
+  // 如果不支持轮廓，请将特征颜色更改为鼠标悬停时为黄色，单击鼠标时为绿色
+  if (Cesium.PostProcessStageLibrary.isSilhouetteSupported(viewer.scene)) {
+    // 支持轮廓 悬浮时
+    // var silhouetteBlue = Cesium.PostProcessStageLibrary.createEdgeDetectionStage()
+    // silhouetteBlue.uniforms.color = Cesium.Color.BLUE// 蓝色
+    // silhouetteBlue.uniforms.length = 0.01
+    // silhouetteBlue.selected = []
+    // 单击时
+    var silhouetteGreen =
+      Cesium.PostProcessStageLibrary.createEdgeDetectionStage();
+    silhouetteGreen.uniforms.color = new Cesium.Color(255 / 255, 0, 0, 1);
+    // silhouetteGreen.uniforms.length = 10;
+    silhouetteGreen.enabled = true;
+    silhouetteGreen.selected = [pickedFeature];
+
+    const greenEdge = Cesium.PostProcessStageLibrary.createEdgeDetectionStage();
+    greenEdge.uniforms.color = Cesium.Color.LIME;
+    greenEdge.selected = [pickedFeature];
+    houetteStage = Cesium.PostProcessStageLibrary.createSilhouetteStage([
+      // silhouetteBlue,
+      silhouetteGreen,
+      // greenEdge,
+    ]);
+
+    viewer.scene.postProcessStages.add(houetteStage);
+  }
+};
     //关闭
     const windowClose = () => {
       const { viewer } = store.state;
@@ -1141,6 +1179,10 @@ export default defineComponent({
     };
     const handleClear = () => {
       const { viewer } = store.state;
+      if (houetteStage) {
+    viewer.scene.postProcessStages.remove(houetteStage);
+    houetteStage = null;
+  }
     };
     onMounted(() => {
       addTiandituMap();

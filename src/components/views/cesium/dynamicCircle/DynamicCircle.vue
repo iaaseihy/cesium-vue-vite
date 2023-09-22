@@ -4,19 +4,16 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-16 11:01:39
+ * @LastEditTime: 2023-09-08 17:44:50
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
-  <div class="panel_view">
-    <ul class="volume-main">
-      <li class="volume-clear">
-        <span @click="addDynamicCircle()">添加圆形扩散</span>
-        <span @click="addMulticolorDynamicCircle()">添加多彩圆形扩散</span>
-        <span @click="addDiffuseDynamicCircle()">添加多彩圆形扩散</span>
-        <span @click="handleClear()">清空</span>
-      </li>
-    </ul>
+  <div style="position: absolute; top: 10px; left: 10px; z-index: 9">
+    <el-button @click="addDynamicCircle()">添加圆形扩散</el-button>
+    <el-button @click="addMulticolorDynamicCircle()">添加多彩圆形扩散</el-button>
+    <el-button @click="addDiffuseDynamicCircle()">添加多彩圆形扩散</el-button>
+    <el-button @click="addRadarScan()">添加雷达扫描</el-button>
+    <el-button @click="handleClear()">清空</el-button>
   </div>
 </template>
   
@@ -35,6 +32,7 @@ import CesiumContainer from "@/views/CesiumContainer.vue";
 import { createDynamicCircleStage } from "./dynamicCircle.js";
 import { MyCesiumExtensions } from "./circleColorfulMaterialProperty.js";
 import CircleDiffusion from "./diffuse.js";
+import CircleWaveMaterialProperty from './CesiumCircleWaveMaterial.js';
 export default defineComponent({
   components: { CesiumContainer },
   setup() {
@@ -126,6 +124,40 @@ export default defineComponent({
         },
       });
     };
+    // 添加雷达扫描
+    const addRadarScan = () => {
+      const { viewer } = store.state;
+      let radar;
+      viewer.entities.add(
+        radar = {
+            name: "",
+            position: Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 0 ),
+            ellipse: {
+                height: 0,
+                semiMinorAxis: 100000,
+                semiMajorAxis: 100000,
+                material: new CircleWaveMaterialProperty({
+                    duration: 2e3,
+                    gradient: 0,
+                    color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
+                    count: 3
+                })
+            }
+        });
+
+        viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(
+          116.4074,
+          39.9042,
+          800000
+        ),
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-90.0),
+          roll: 0.0,
+        },
+      });
+    };
     // 设置相机是否进入地下
     const limitCameraToGround = (isOpen) => {
       //  if (limitCameraHandler) {
@@ -149,7 +181,7 @@ export default defineComponent({
       if (dynamicCircle) {
         viewer.scene.postProcessStages.remove(dynamicCircle);
       }
-      if (circleDiffusion) {
+      if (circleDiffusion.value) {
         circleDiffusion.clear();
       }
     };
@@ -164,6 +196,7 @@ export default defineComponent({
       addDynamicCircle,
       addMulticolorDynamicCircle,
       addDiffuseDynamicCircle,
+      addRadarScan,
       limitCameraToGround,
     };
   },
@@ -205,46 +238,6 @@ export default defineComponent({
 #creditContainer {
   display: none;
 }
-.panel_view {
-  position: absolute;
-  top: 500px;
-  right: 100px;
-  z-index: 200;
-  width: 200px;
-  height: 300px;
-  background: rgba(0, 255, 255, 0.7);
-  border: 1px solid #529dd6;
-  border-radius: 5px;
-}
-.volume-main {
-  line-height: 26px;
-  padding: 0 10px;
-}
-.volume-main li {
-  list-style-type: none;
-}
-.volume-clear {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px dashed;
-  color: #ffffff;
-  padding-bottom: 6px;
-}
-.volume-color {
-  display: flex;
-  align-content: center;
-  justify-content: space-between;
-}
-.volume-clear span {
-  cursor: pointer;
-}
-.volume-item {
-  margin-top: 8px;
-}
-.volume-color {
-  display: flex;
-  align-content: center;
-  justify-content: space-between;
-}
+
 </style>
   

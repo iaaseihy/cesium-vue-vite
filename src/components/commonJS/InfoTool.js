@@ -13,7 +13,7 @@
 // import defined from "cesium/Source/Core/defined.js";
 import { Viewer, Math, Cesium3DTileFeature, Cartesian2, Cartesian3, Cartographic, SceneTransforms, defined } from 'cesium';
 import './info.css';
-import * as util from './util.js'
+import * as util from './infoToolUtil.js'
 // ====================
 // 类
 // ====================
@@ -169,7 +169,7 @@ class InfoTool {
         } else {
             if (options instanceof Cartesian2 || options instanceof Cartesian3) {
                 position = options;
-                options = {};
+                // options = {};
             } else {
                 position = options.position;
                 inputFeature = options.inputFeature;
@@ -226,20 +226,25 @@ class InfoTool {
                 }
             }
         } else {
-            // options.content && (info = options.content);
-            // options.content && (info = options.pos);
-            let content = options.content;
-            let featuresLength = content.featuresLength;
-            console.log("要素数量为：");
-            console.log(featuresLength);
-            console.log("第一个要素属性为：");
-            let feature = content.getFeature(0).getProperty("name");
-            console.log(feature);
-            if (feature) {
-                info = feature;
-            } else {
-                info = options.pos
-            }
+            // // options.content && (info = options.content);
+            // // options.content && (info = options.pos);
+            // let content = options.content;
+            // let featuresLength = content.featuresLength;
+            // console.log("要素数量为：");
+            // console.log(featuresLength);
+            // console.log("第一个要素属性为：");
+            // let feature = content.getFeature(0).getProperty("name");
+            // console.log(feature);
+            // if (feature) {
+            //     info = feature;
+            // } else {
+            //     info = options.pos
+            // }
+            var cartographic = Cesium.Cartographic.fromCartesian(options);
+            var lat = Cesium.Math.toDegrees(cartographic.latitude);
+            var lng = Cesium.Math.toDegrees(cartographic.longitude);
+            var alt = cartographic.height;
+            info = lng
         }
 
         // 2.生成特效
@@ -263,10 +268,11 @@ class InfoTool {
         InfoTool.#createInfoTool(this.viewer, options, function () {
             util.setInnerText(that.#element.querySelector("div:nth-child(2)"), info);
             util.setInnerText(that.#element.querySelector("div:nth-child(3)"), 'X');
+            console.log(that.#element.querySelector("div:nth-child(3)"));
             // X号绑定点击事件 点击到关闭
             that.#element.querySelector("div:nth-child(3)").onclick = function(){
                 that.remove();
-            }
+        }
             typeof callback === "function" && callback();
         });
     }

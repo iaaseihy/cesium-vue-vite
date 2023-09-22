@@ -1,3 +1,11 @@
+/*
+ * @Descripttion: 
+ * @version: v1.0
+ * @Author: CaoChaoqiang
+ * @Date: 2023-06-30 16:23:42
+ * @LastEditors: CaoChaoqiang
+ * @LastEditTime: 2023-09-06 17:50:12
+ */
 import * as Cesium from 'cesium';
 /*
           流纹纹理线
@@ -42,7 +50,7 @@ PolylineTrailLinkMaterialProperty.prototype.equals = function (other) {
         (other instanceof PolylineTrailLinkMaterialProperty &&
             Cesium.Property.equals(this._color, other._color))
 }
-Cesium.PolylineTrailLinkMaterialProperty = PolylineTrailLinkMaterialProperty;
+// Cesium.PolylineTrailLinkMaterialProperty = PolylineTrailLinkMaterialProperty;
 Cesium.Material.PolylineTrailLinkType = 'PolylineTrailLink';
 Cesium.Material.PolylineTrailLinkImage = "./colors1.png";
 Cesium.Material.PolylineTrailLinkSource = "czm_material czm_getMaterial(czm_materialInput materialInput)\n\

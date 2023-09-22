@@ -1,11 +1,12 @@
 /*
- * @Author: 王建博 wangjianbo@automic.com.cn
- * @Date: 2022-08-05 17:41:49
- * @LastEditors: 王建博 wangjianbo@automic.com.cn
- * @LastEditTime: 2022-08-22 15:42:30
- * @FilePath: \demo\src\js\mapjs\waterPrimitive.js
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @Descripttion: 
+ * @version: v1.0
+ * @Author: CaoChaoqiang
+ * @Date: 2023-08-31 14:20:57
+ * @LastEditors: CaoChaoqiang
+ * @LastEditTime: 2023-09-13 13:52:21
  */
+
 import * as Cesium from "cesium";
 export function WaterPrimitive(options) {
     this._positions =options.positions;

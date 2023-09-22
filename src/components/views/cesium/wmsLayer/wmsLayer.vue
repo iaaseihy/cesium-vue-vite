@@ -4,17 +4,13 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-14 16:59:51
+ * @LastEditTime: 2023-09-08 16:08:10
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
-  <div class="panel_view">
-    <ul class="volume-main">
-      <li class="volume-clear">
-        <span @click="addWMSLayer()">添加wms图层</span>
-        <span @click="handleClear()">清空</span>
-      </li>
-    </ul>
+  <div style="position: absolute; top: 10px; left: 10px; z-index: 9">
+    <el-button @click="addWMSLayer()">添加wms图层</el-button>
+    <el-button @click="handleClear()">清空</el-button>
   </div>
 </template>
 
@@ -29,6 +25,7 @@ import DragEntity from "./dragentity.js";
 import { CesiumPopup } from "cesium-popup-es6";
 import Label from "./index.vue";
 import DivLabel from "./divLabel.js";
+import InfoTool from "../../../commonJS/InfoTool.js";
 const WindowVm = defineComponent(Label);
 export default defineComponent({
   components: { CesiumContainer },
@@ -78,6 +75,7 @@ export default defineComponent({
       },
     ];
     let vmInstance;
+    let pickEntity;
     let state;
     let divLabel;
     const onMove = (_state) => {
@@ -117,6 +115,23 @@ export default defineComponent({
         bubble(item.id);
       });
       // bubble("dayanta.1")
+
+      // // 获取div:nth-child(3)元素  关闭方法四生成的弹窗
+      // let divElement = document.getElementsByClassName(
+      //   "helsing-three-plugins-infotool"
+      // );
+      // if (divElement && divElement.length > 0) {
+      //   let div3 = divElement[0].children[2];
+      //   if (div3) {
+      //     div3.onclick = function () {
+      //       console.log("鼠标点击了div:nth-child(3)");
+      //       if (pickEntity) {
+      //         pickEntity.remove();
+      //       }
+      //       // handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+      //     };
+      //   }
+      // }
     };
     const bubble = (id) => {
       const { viewer } = store.state;
@@ -125,7 +140,6 @@ export default defineComponent({
         bubbles.windowClose();
       }
       console.log(poinEntity[id]);
-      viewer.scene.globe.depthTestAgainstTerrain = true; //（开启）
 
       // 方法一
       bubbles = new Bubble(
@@ -142,31 +156,44 @@ export default defineComponent({
       let title = val.monitoItems.data.geometry_name;
       let state = val.monitoItems.data.properties.miaoshu;
       let valId = val.id;
-            const app = createApp(WindowVm, {
-              title,
-              state,
-              valId
-            });
-            vmInstance = app.mount(document.createElement('div'));
-            vmInstance.closeEvent = (e) => {
-              windowClose();
-              // if (this.createEntity) {
-              //   this.viewer.entities.remove(this.createEntity)
-              // }
-            };
-            // const html3 = vmInstance.$el;
-            let pos = poinEntity[id].position._value;
-            console.log(pos);
-            const cartesian33 = Cesium.Cartesian3.fromDegrees(108.95908736, 34.22015112, 15.8186244347767)
-            // const cartesian33 = pos;
+      const app = createApp(WindowVm, {
+        title,
+        state,
+        valId,
+      });
+      vmInstance = app.mount(document.createElement("div"));
+      vmInstance.closeEvent = (e) => {
+        windowClose();
+        // if (this.createEntity) {
+        //   this.viewer.entities.remove(this.createEntity)
+        // }
+      };
+      // const html3 = vmInstance.$el;
+      let pos = poinEntity[id].position._value;
+      console.log(pos);
+      const cartesian33 = Cesium.Cartesian3.fromDegrees(
+        108.95908736,
+        34.22015112,
+        15.8186244347767
+      );
+      // const cartesian33 = pos;
       const html3 = `<div class="title">飞机模型</div>
-       <div class="content">我在飞机模型上</div>`
+       <div class="content">我在飞机模型上</div>`;
       //  bubbles = new CesiumPopup(viewer, {
       //      position: cartesian33, html: html3, className: "earth-popup-imgbg-blue", popPosition: "leftbottom"
       //  }, onMove)
 
       // 方法三
       addDivLabel(val, title, state, valId);
+
+      // 方法四
+      pickEntity = new InfoTool(viewer);
+      let pickPos = poinEntity[id].position._value;
+      let options = {
+        pickPos,
+        title,
+      };
+      pickEntity.add(pickPos);
     };
     const leftDownAction = () => {
       const { viewer } = store.state;
@@ -207,6 +234,9 @@ export default defineComponent({
       if (vmInstance) {
         vmInstance.$el.remove();
         vmInstance = null;
+      }
+      if (pickEntity) {
+        pickEntity.remove();
       }
     };
     //加载点
@@ -316,148 +346,6 @@ export default defineComponent({
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     };
-    const getLevel = (height) => {
-      if (height > 48000000) {
-        return 0;
-      } else if (height > 24000000) {
-        return 1;
-      } else if (height > 12000000) {
-        return 2;
-      } else if (height > 6000000) {
-        return 3;
-      } else if (height > 3000000) {
-        return 4;
-      } else if (height > 1500000) {
-        return 5;
-      } else if (height > 750000) {
-        return 6;
-      } else if (height > 375000) {
-        return 7;
-      } else if (height > 187500) {
-        return 8;
-      } else if (height > 93750) {
-        return 9;
-      } else if (height > 46875) {
-        return 10;
-      } else if (height > 23437.5) {
-        return 11;
-      } else if (height > 11718.75) {
-        return 12;
-      } else if (height > 5859.38) {
-        return 13;
-      } else if (height > 2929.69) {
-        return 14;
-      } else if (height > 1464.84) {
-        return 15;
-      } else if (height > 732.42) {
-        return 16;
-      } else if (height > 366.21) {
-        return 17;
-      } else {
-        return 18;
-      }
-    };
-    const renderPopup = (layerInfo, position) => {
-      const { viewer } = store.state;
-      let contentArr = [];
-      let page = "";
-      for (let i = 0; i < layerInfo.length; i++) {
-        // 处理查询到的结果
-        const data = layerInfo[i].properties;
-        const content = `<div>${data.Id}</div><table><tbody>
-          <tr><td>FID:</th><td>${data.maxheight}</td></tr>
-          <tr><td>名称:</th><td>${data.miaoshu}</td></tr>
-          <tr><td>状态:</th><td>${data.minheight}</td></tr>
-          <tr><td>地址:</th><td>${data.name}</td></tr>
-          </tbody></table>`;
-        contentArr.push(content);
-        // 生成页码
-        if (i == 0) {
-          page =
-            page +
-            `<li style="color: #fff000; border: 1px solid #fff000;" id=${i}>${
-              i + 1
-            }</li>`;
-        } else {
-          page = page + `<li id=${i}>${i + 1}</li>`;
-        }
-      }
-      let pageContent = `<ul id="page">${page}</ul>`;
-      infoPopuEvent(handler, position, contentArr, pageContent);
-    };
-    const infoPopuEvent = (handler, position, contentArr, pageContent) => {
-      const infoDiv = `<div id="trackPopUp" class="trackPopUp">
-                      <div id="trackPopUpContent" class="leaflet-popup" style="top:5px;left:0;">
-                        <a class="leaflet-popup-close-button" href="#">×</a>
-                        <div class="leaflet-popup-content-wrapper">
-                          <div id="trackPopUpLink" class="leaflet-popup-content">                        
-                          </div>
-                          <div class="leaf-popup-page">${pageContent}</div>
-                        </div>
-                      </div>
-                  </div>`;
-      // if ($("#trackPopUp").length > 0) {
-      //   $("#trackPopUp").remove();
-      // }
-      const trackPopUp = document.getElementById("trackPopUp");
-      if (trackPopUp && trackPopUp.length > 0) {
-        trackPopUp.remove();
-      }
-      this.$refs.cesiumContainer.innerHTML = infoDiv;
-      // $("#cesiumContainer").append(infoDiv);
-      // $("#trackPopUp").show();
-      trackPopUp.show();
-      //页码点击事件
-      $("#page li").click((e) => {
-        const index = parseInt(e.currentTarget.id);
-        const liChild = $("#page").children();
-        $(liChild[index]).css({
-          color: "#fff000",
-          border: "1px solid #fff000",
-        });
-        $(liChild[index])
-          .siblings()
-          .css({ color: "#fff", border: "1px solid #fff" });
-        $("#trackPopUpLink").empty();
-        $("#trackPopUpLink").append(contentArr[index]);
-      });
-      var obj = { position: position, content: contentArr[0] };
-      infoWindow(obj);
-      function infoWindow(obj) {
-        $(".cesium-selection-wrapper").show();
-        $("#trackPopUpLink").empty();
-        $("#trackPopUpLink").append(obj.content);
-        function positionPopUp(c) {
-          var x = c.x - $("#trackPopUpContent").width() / 2;
-          var y = c.y - $("#trackPopUpContent").height();
-          $("#trackPopUpContent").css(
-            "transform",
-            "translate3d(" + x + "px, " + y + "px, 0)"
-          );
-        }
-        var c = new Cesium.Cartesian2(obj.position.x, obj.position.y);
-        $("#trackPopUp").show();
-        positionPopUp(c);
-        $(".leaflet-popup-close-button").click(function () {
-          $("#trackPopUp").hide();
-          $("#trackPopUpLink").empty();
-          $(".cesium-selection-wrapper").hide();
-          return false;
-        });
-        //绑定地图移动
-        handler.setInputAction(function (movement) {
-          $("#trackPopUp").hide();
-        }, Cesium.ScreenSpaceEventType.LEFT_UP);
-        //绑定地图缩放
-        handler.setInputAction(function (movement) {
-          $("#trackPopUp").hide();
-        }, Cesium.ScreenSpaceEventType.WHEEL);
-        //绑定滚轮点击事件
-        handler.setInputAction(function (movement) {
-          $("#trackPopUp").hide();
-        }, Cesium.ScreenSpaceEventType.MIDDLE_DOWN);
-      }
-    };
     const loadTileset = (url) => {
       const { viewer } = store.state;
       clippingPlanes = new Cesium.ClippingPlaneCollection({
@@ -516,6 +404,7 @@ export default defineComponent({
       if (bubbles) {
         bubbles.windowClose();
       }
+      windowClose();
       // if (divLabel) {
       //   divLabel.windowClose();
       // }
@@ -573,47 +462,6 @@ export default defineComponent({
 }
 #creditContainer {
   display: none;
-}
-.panel_view {
-  position: absolute;
-  top: 500px;
-  right: 100px;
-  z-index: 200;
-  width: 200px;
-  height: 100px;
-  background: rgba(0, 255, 255, 0.7);
-  border: 1px solid #529dd6;
-  border-radius: 5px;
-}
-.volume-main {
-  line-height: 26px;
-  padding: 0 10px;
-}
-.volume-main li {
-  list-style-type: none;
-}
-.volume-clear {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px dashed;
-  color: #ffffff;
-  padding-bottom: 6px;
-}
-.volume-color {
-  display: flex;
-  align-content: center;
-  justify-content: space-between;
-}
-.volume-clear span {
-  cursor: pointer;
-}
-.volume-item {
-  margin-top: 8px;
-}
-.volume-color {
-  display: flex;
-  align-content: center;
-  justify-content: space-between;
 }
 
 /*--------------------------气泡弹窗Start---------------------------*/

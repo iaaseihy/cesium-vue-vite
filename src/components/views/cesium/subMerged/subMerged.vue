@@ -4,13 +4,14 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-08-29 11:33:16
+ * @LastEditTime: 2023-09-22 10:31:43
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
   <div style="position: absolute; top: 10px; left: 10px; z-index: 9">
     <el-button @click="BAIMOEditWay2()">白膜变色2</el-button>
     <el-button @click="drawExtent()">添加淹没分析范围</el-button>
+    <el-button @click="reflectWater()">水体镜面反射折射</el-button>
     <el-button @click="induationAnalysis()">开始淹没分析</el-button>
     <el-button @click="induationAnalysis2()">开始淹没分析2</el-button>
     <el-button @click="clearAllEntities()">清除</el-button>
@@ -32,6 +33,7 @@ import {
   GAODE_IMG_URL,
 } from "../../../commonJS/config.js";
 import measureAreaSpace from "./subMerged.js";
+import WaterPrimitive from "./WaterPrimitive.js";
 export default defineComponent({
   components: { CesiumContainer, ElMessage },
   setup() {
@@ -318,6 +320,17 @@ export default defineComponent({
         },
       });
     };
+
+    const reflectWater = () => {
+      const { viewer } = store.state;
+      const aaa = new WaterPrimitive({
+        scene: viewer.scene,
+        positions: activeShapePoints,
+        height: 10,
+        rippleSize: 100,
+      });
+    };
+
     /**
      * @author:
      * @Date: 2022-04-11 16:45:05
@@ -383,7 +396,10 @@ export default defineComponent({
                 // Cesium.Cartesian3.fromDegreesArrayHeights(activeShapePoints)
                 activeShapePoints
               ),
-              height: maxWaterHeight,
+              height: minWaterHeight,
+              //     extrudedHeight: new Cesium.CallbackProperty(() => {
+              //   return waterHeight;
+              // }, false),
             }),
           }),
           appearance: new Cesium.EllipsoidSurfaceAppearance({
@@ -405,8 +421,56 @@ export default defineComponent({
                   amplitude: 10.0, //振幅大小
                   specularIntensity: 10,
                 },
+                // source: `
+
+                // `,
               },
             }),
+            //             fragmentShaderSource: `
+            //         in vec2 v_st;
+            //         in vec3 v_positionEC;
+            //         in vec3 v_normalEC;
+            //         in vec3 positionWC;
+            //         in vec3 iMouse = vec3(0.0, 0.0 ,0.0 )
+            //       void main( out vec4 fragColor, in vec2 fragCoord )
+            // {
+            //     float resolution = 10. * exp2(-3.*iMouse.x/iResolution.x);
+            // 	vec2 uv = fragCoord.xy / iResolution.y * resolution;
+            //     vec2 p0 = floor(uv);
+
+            //     vec2 circles = vec2(0.);
+            //     for (int j = -MAX_RADIUS; j <= MAX_RADIUS; ++j)
+            //     {
+            //         for (int i = -MAX_RADIUS; i <= MAX_RADIUS; ++i)
+            //         {
+            // 			vec2 pi = p0 + vec2(i, j);
+            //             #if DOUBLE_HASH
+            //             vec2 hsh = hash22(pi);
+            //             #else
+            //             vec2 hsh = pi;
+            //             #endif
+            //             vec2 p = pi + hash22(hsh);
+
+            //             float t = fract(0.3*iTime + hash12(hsh));
+            //             vec2 v = p - uv;
+            //             float d = length(v) - (float(MAX_RADIUS) + 1.)*t;
+
+            //             float h = 1e-3;
+            //             float d1 = d - h;
+            //             float d2 = d + h;
+            //             float p1 = sin(31.*d1) * smoothstep(-0.6, -0.3, d1) * smoothstep(0., -0.3, d1);
+            //             float p2 = sin(31.*d2) * smoothstep(-0.6, -0.3, d2) * smoothstep(0., -0.3, d2);
+            //             circles += 0.5 * normalize(v) * ((p2 - p1) / (2. * h) * (1. - t) * (1. - t));
+            //         }
+            //     }
+            //     circles /= float((MAX_RADIUS*2+1)*(MAX_RADIUS*2+1));
+
+            //     float intensity = mix(0.01, 0.15, smoothstep(0.1, 0.6, abs(fract(0.05*iTime + 0.5)*2.-1.)));
+            //     vec3 n = vec3(circles, sqrt(1. - dot(circles, circles)));
+            //     vec3 color = texture(iChannel0, uv/resolution - intensity*n.xy).rgb + 5.*pow(clamp(dot(n, normalize(vec3(1., 0.7, 0.5))), 0., 1.), 6.);
+            //     out_FragColor = vec4(color, 1.0);
+            // }
+            //                 `,
           }),
           show: true,
         })
@@ -442,104 +506,103 @@ export default defineComponent({
     const createWaterPrimitive2 = () => {
       const { viewer } = store.state;
       let vs =
-'out vec3 position;' +
-'out vec2 st;' +
-'uniform mat4 u_modelViewMatrix;' +
-'uniform mat4 u_invWorldViewMatrix;' +
-//'uniform vec2 u_texCoordOffset;' +
-//'uniform vec2 u_texCoordScale;' +
-//'uniform float u_frameTime;' +
-'uniform int u_clampToGroud;' +
-'uniform vec3 u_camPos;' +
-'uniform vec3 u_scale;' +
-//'varying vec3 eyeDir;' +
-'out vec3 vToEye;' +
-    //'varying vec2 texCoord;' +
-    'out vec2 vUv;' +
-    //'varying float myTime;' +
-    //'varying vec4 projectionCoord;' +
-    'out vec4 vCoord;' +
-
-    'void main(void)' +
-    '{' +
-    //gl_Position = ftransform();
-    'vec4 positionW = u_modelViewMatrix * vec4(position.xyz, 1.0);' +
-    'vec4 eyep = czm_modelView * positionW;' +
-    'gl_Position = czm_projection * eyep; ' +
-    'if (u_clampToGroud == 1)' +
-    '{' +
-    //'eyeDir = (u_camPos - position.xyz) * u_scale;' +vToEye
-    'vToEye = (u_camPos - position.xyz) * u_scale;' +
-    '} else {' +
-    'vec4 pos = u_modelViewMatrix * vec4(position.xyz,1.0);' +
-    //'eyeDir = vec3(u_invWorldViewMatrix*vec4(pos.xyz,0.0));' +
-    'vToEye = vec3(u_invWorldViewMatrix*vec4(pos.xyz,0.0));' +
-    //'projectionCoord = gl_Position;' +
-    'vCoord = gl_Position;' +
-    '}' +
-    //'texCoord = (st+u_texCoordOffset)*u_texCoordScale;' +
-    //'vUv = (st+u_texCoordOffset)*u_texCoordScale;' +
-    'vUv = st;' +
-    //'myTime = 0.01 * u_frameTime;' +
-    '}';
+        "out vec3 position;" +
+        "out vec2 st;" +
+        "uniform mat4 u_modelViewMatrix;" +
+        "uniform mat4 u_invWorldViewMatrix;" +
+        //'uniform vec2 u_texCoordOffset;' +
+        //'uniform vec2 u_texCoordScale;' +
+        //'uniform float u_frameTime;' +
+        "uniform int u_clampToGroud;" +
+        "uniform vec3 u_camPos;" +
+        "uniform vec3 u_scale;" +
+        //'varying vec3 eyeDir;' +
+        "out vec3 vToEye;" +
+        //'varying vec2 texCoord;' +
+        "out vec2 vUv;" +
+        //'varying float myTime;' +
+        //'varying vec4 projectionCoord;' +
+        "out vec4 vCoord;" +
+        "void main(void)" +
+        "{" +
+        //gl_Position = ftransform();
+        "vec4 positionW = u_modelViewMatrix * vec4(position.xyz, 1.0);" +
+        "vec4 eyep = czm_modelView * positionW;" +
+        "gl_Position = czm_projection * eyep; " +
+        "if (u_clampToGroud == 1)" +
+        "{" +
+        //'eyeDir = (u_camPos - position.xyz) * u_scale;' +vToEye
+        "vToEye = (u_camPos - position.xyz) * u_scale;" +
+        "} else {" +
+        "vec4 pos = u_modelViewMatrix * vec4(position.xyz,1.0);" +
+        //'eyeDir = vec3(u_invWorldViewMatrix*vec4(pos.xyz,0.0));' +
+        "vToEye = vec3(u_invWorldViewMatrix*vec4(pos.xyz,0.0));" +
+        //'projectionCoord = gl_Position;' +
+        "vCoord = gl_Position;" +
+        "}" +
+        //'texCoord = (st+u_texCoordOffset)*u_texCoordScale;' +
+        //'vUv = (st+u_texCoordOffset)*u_texCoordScale;' +
+        "vUv = st;" +
+        //'myTime = 0.01 * u_frameTime;' +
+        "}";
       let fs = [
-    'uniform sampler2D tReflectionMap;',
-    'uniform sampler2D tRefractionMap;',
-    'uniform sampler2D tNormalMap0;',
-    'uniform sampler2D tNormalMap1;',
-    'uniform sampler2D tFlowMap;',
-    
-    'uniform vec3 color;',
-    'uniform float reflectivity;',
-    'uniform vec4 config;',
+        "uniform sampler2D tReflectionMap;",
+        "uniform sampler2D tRefractionMap;",
+        "uniform sampler2D tNormalMap0;",
+        "uniform sampler2D tNormalMap1;",
+        "uniform sampler2D tFlowMap;",
 
-    'in vec4 vCoord;',
-    'in vec2 vUv;',
-    'in vec3 vToEye;',
+        "uniform vec3 color;",
+        "uniform float reflectivity;",
+        "uniform vec4 config;",
 
-    'void main() {',
-    '	float flowMapOffset0 = config.x;',
-    '	float flowMapOffset1 = config.y;',
-    '	float halfCycle = config.z;',
-    '	float scale = config.w;',
+        "in vec4 vCoord;",
+        "in vec2 vUv;",
+        "in vec3 vToEye;",
 
-    '	vec3 toEye = normalize( vToEye );',
+        "void main() {",
+        "	float flowMapOffset0 = config.x;",
+        "	float flowMapOffset1 = config.y;",
+        "	float halfCycle = config.z;",
+        "	float scale = config.w;",
 
-    // determine flow direction
-    '	vec2 flow;',
-    //'	#ifdef USE_FLOWMAP',
-    //'		flow = texture( tFlowMap, vUv ).rg * 2.0 - 1.0;',
-    '		flow = texture( tFlowMap, vUv ).rg;',
-    //'	#else',
-    //'		flow = flowDirection;',
-    //'	#endif',
-    //'	flow.x *= - 1.0;',
+        "	vec3 toEye = normalize( vToEye );",
 
-    // sample normal maps (distort uvs with flowdata)
-    '	vec4 normalColor0 = texture( tNormalMap0, ( vUv * scale ) + flow * flowMapOffset0 );',
-    '	vec4 normalColor1 = texture( tNormalMap1, ( vUv * scale ) + flow * flowMapOffset1 );',
+        // determine flow direction
+        "	vec2 flow;",
+        //'	#ifdef USE_FLOWMAP',
+        //'		flow = texture( tFlowMap, vUv ).rg * 2.0 - 1.0;',
+        "		flow = texture( tFlowMap, vUv ).rg;",
+        //'	#else',
+        //'		flow = flowDirection;',
+        //'	#endif',
+        //'	flow.x *= - 1.0;',
 
-    '	float flowLerp = abs( halfCycle - flowMapOffset0 ) / halfCycle;',
-    '	vec4 normalColor = mix( normalColor0, normalColor1, flowLerp );',
+        // sample normal maps (distort uvs with flowdata)
+        "	vec4 normalColor0 = texture( tNormalMap0, ( vUv * scale ) + flow * flowMapOffset0 );",
+        "	vec4 normalColor1 = texture( tNormalMap1, ( vUv * scale ) + flow * flowMapOffset1 );",
 
-    '	vec3 normal = normalize( vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 ) );',
+        "	float flowLerp = abs( halfCycle - flowMapOffset0 ) / halfCycle;",
+        "	vec4 normalColor = mix( normalColor0, normalColor1, flowLerp );",
 
-    // calculate the fresnel term to blend reflection and refraction maps
-    '	float theta = max( dot( toEye, normal ), 0.0 );',
-    '	float reflectance = reflectivity + ( 1.0 - reflectivity ) * pow( ( 1.0 - theta ), 5.0 );',
+        "	vec3 normal = normalize( vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 ) );",
 
-    // calculate final uv coords
-    '	vec3 coord = vCoord.xyz / vCoord.w;',
-    '   vec2 coord1 = gl_FragCoord.xy / czm_viewport.zw;',
-    '	vec2 uv = coord1.xy + coord.z * normal.xz * 0.05;',
+        // calculate the fresnel term to blend reflection and refraction maps
+        "	float theta = max( dot( toEye, normal ), 0.0 );",
+        "	float reflectance = reflectivity + ( 1.0 - reflectivity ) * pow( ( 1.0 - theta ), 5.0 );",
 
-    '	vec4 reflectColor = texture( tReflectionMap, vec2( 1.0 - uv.x, uv.y ) );',
-    '	vec4 refractColor = texture( tRefractionMap, uv );',
+        // calculate final uv coords
+        "	vec3 coord = vCoord.xyz / vCoord.w;",
+        "   vec2 coord1 = gl_FragCoord.xy / czm_viewport.zw;",
+        "	vec2 uv = coord1.xy + coord.z * normal.xz * 0.05;",
 
-    '	out_FragColor = vec4( color, 1.0 ) * mix( refractColor, reflectColor, reflectance );',
-    'out_FragColor = refractColor;',
-    '}'
-].join('\n');
+        "	vec4 reflectColor = texture( tReflectionMap, vec2( 1.0 - uv.x, uv.y ) );",
+        "	vec4 refractColor = texture( tRefractionMap, uv );",
+
+        "	out_FragColor = vec4( color, 1.0 ) * mix( refractColor, reflectColor, reflectance );",
+        "out_FragColor = refractColor;",
+        "}",
+      ].join("\n");
       let waterEntityEnd = viewer.scene.primitives.add(
         new Cesium.Primitive({
           geometryInstances: new Cesium.GeometryInstance({
@@ -559,7 +622,8 @@ export default defineComponent({
               fabric: {
                 type: "Water",
                 uniforms: {
-                  specularMap: "../../../../../public/static/texture/waterNormals.jpg",
+                  specularMap:
+                    "../../../../../public/static/texture/waterNormals.jpg",
                   normalMap: Cesium.buildModuleUrl(
                     "../../../../../public/static/texture/waterNormals.jpg"
                   ),
@@ -571,31 +635,32 @@ export default defineComponent({
             }),
             // vertexShaderSource: vs,
             // fragmentShaderSource: fs,
-            fragmentShaderSource: 'in vec3 v_positionMC;\n' +
-                     'in vec3 v_positionEC;\n' +
-                     'in vec2 v_st;\n' +
-                     'void main()\n' +
-                     '{\n' +
-                     'czm_materialInput materialInput;\n' +
-                    'vec3 normalEC = normalize(czm_normal3D * czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0)));\n' +
-                     '#ifdef FACE_FORWARD\n' +
-                     'normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);\n' +
-                     '#endif\n' +
-                     'materialInput.s = v_st.s;\n' +
-                     'materialInput.st = v_st;\n' +
-                     'materialInput.str = vec3(v_st, 0.0);\n' +
-                     'materialInput.normalEC = normalEC;\n' +
-                     'materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, materialInput.normalEC);\n' +
-                     'vec3 positionToEyeEC = -v_positionEC;\n' +
-                     'materialInput.positionToEyeEC = positionToEyeEC;\n' +
-                     'czm_material material = czm_getMaterial(materialInput);\n' +
-                     '#ifdef FLAT\n' +
-                     'out_FragColor = vec4(material.diffuse + material.emission, material.alpha);\n' +
-                     '#else\n' +
-                     'out_FragColor = czm_phong(normalize(positionToEyeEC), material, czm_lightDirectionEC);\n' +
-                     'out_FragColor.a=0.85;\n' +
-                    '#endif\n' +
-                     '}\n'
+            fragmentShaderSource:
+              "in vec3 v_positionMC;\n" +
+              "in vec3 v_positionEC;\n" +
+              "in vec2 v_st;\n" +
+              "void main()\n" +
+              "{\n" +
+              "czm_materialInput materialInput;\n" +
+              "vec3 normalEC = normalize(czm_normal3D * czm_geodeticSurfaceNormal(v_positionMC, vec3(0.0), vec3(1.0)));\n" +
+              "#ifdef FACE_FORWARD\n" +
+              "normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);\n" +
+              "#endif\n" +
+              "materialInput.s = v_st.s;\n" +
+              "materialInput.st = v_st;\n" +
+              "materialInput.str = vec3(v_st, 0.0);\n" +
+              "materialInput.normalEC = normalEC;\n" +
+              "materialInput.tangentToEyeMatrix = czm_eastNorthUpToEyeCoordinates(v_positionMC, materialInput.normalEC);\n" +
+              "vec3 positionToEyeEC = -v_positionEC;\n" +
+              "materialInput.positionToEyeEC = positionToEyeEC;\n" +
+              "czm_material material = czm_getMaterial(materialInput);\n" +
+              "#ifdef FLAT\n" +
+              "out_FragColor = vec4(material.diffuse + material.emission, material.alpha);\n" +
+              "#else\n" +
+              "out_FragColor = czm_phong(normalize(positionToEyeEC), material, czm_lightDirectionEC);\n" +
+              "out_FragColor.a=0.85;\n" +
+              "#endif\n" +
+              "}\n",
           }),
           show: true,
         })
@@ -956,6 +1021,20 @@ export default defineComponent({
       }
       return cartographic;
     };
+    const setView = (viewer, param) => {
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(
+          param.lon,
+          param.lat,
+          param.alt
+        ),
+        orientation: {
+          heading: Cesium.Math.toRadians(param.heading), // east, default value is 0.0 (north)
+          pitch: Cesium.Math.toRadians(param.pitch), // default value (looking down)
+          roll: Cesium.Math.toRadians(param.roll), // default value
+        },
+      });
+    };
     /**
      * @author:
      * @Date: 2022-04-11 16:44:42
@@ -988,6 +1067,17 @@ export default defineComponent({
       const { viewer } = store.state;
     };
     onMounted(() => {
+      const { viewer } = store.state;
+      let viewTarget = {
+            lon: 109.08,
+            lat: 30.94,
+            alt: 3000,
+            heading: -90.0, // east, default value is 0.0 (north)
+            pitch: -20, // default value (looking down)
+            roll: 0.0, // default value
+      };
+      //设置相机位置
+      setView(viewer, viewTarget);
       // outlineView();
       // addTiandituMap();
     });
@@ -997,6 +1087,7 @@ export default defineComponent({
     return {
       handleClear,
       drawExtent,
+      reflectWater,
       BAIMOEditWay2,
       induationAnalysis,
       induationAnalysis2,
