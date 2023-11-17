@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-27 10:34:54
+ * @LastEditTime: 2023-10-18 14:57:36
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -18,13 +18,14 @@
     </ul>
   </div>
 </template>
-    
-    <script>
+
+<script>
 import * as Cesium from "cesium";
 import { defineComponent, onMounted, onUnmounted } from "vue";
 import { useStore } from "vuex";
 import CesiumContainer from "@/views/CesiumContainer.vue";
 import { getGeojson } from "@/api/api.js";
+import waternormolsIMG from './waterNormals.jpg'
 
 export default defineComponent({
   components: { CesiumContainer },
@@ -61,20 +62,28 @@ export default defineComponent({
           description: "测试第一人称视角。",
           availability: "2023-03-08T10:00:00Z/2023-03-08T15:00:00Z",
           path: {
+            // material: {
+            //   polylineGlow: {
+            //     color: {
+            //       rgba: [0, 0, 255, 200],
+            //     },
+            //     glowPower: 0.1,
+            //     taperPower: 0.1,
+            //   },
+            // },
             material: {
-              polylineGlow: {
+              solidColor: {
                 color: {
-                  rgba: [0, 0, 255, 200],
+                  rgba: [0, 55, 120, 200],
                 },
-                glowPower: 0.1,
-                taperPower: 0.1,
-              },
+                },
             },
             width: 20,
             leadTime: 0,
             trailTime: 1000,
             resolution: 0.5,
             show: true,
+            // clampToGround: true,
           },
           model: {
             // 模型参数
@@ -91,32 +100,60 @@ export default defineComponent({
             interpolationAlgorithm: "LAGRANGE",
             interpolationDegree: 5,
             epoch: "2023-03-08T10:00:00Z",
-            // 坐标组
+            // 坐标组 cartographicDegrees，每四个表示一个时刻的位置和高度，这四个分别为时间(秒)、经度、纬度、高度
             cartographicDegrees: [
-              0, 118.93830177292894, 25.488280583435404, 0, 300,
-              119.14034602637892, 25.32388938213355, 2000, 800,
-              119.43064375816327, 25.230148210056235, 5000, 1500,
-              120.93105921868252, 24.769194048014963, 12000, 2500,
-              121.5592902752412, 24.658964292017885, 12000, 3500,
-              121.56445881860067, 25.16649023047563, 5000, 4500,
-              119.94263373897657, 25.49632056739945, 12000, 5500,
-              119.30910179629008, 25.559938450361965, 5000, 6500,
-              118.96295053426707, 25.571485127594467, 0,
+              0, 118.93830177292894, 25.488280583435404, 0, 
+              300,119.14034602637892, 25.32388938213355, 2000, 
+              800,119.43064375816327, 25.230148210056235, 5000,
+              1500,120.93105921868252, 24.769194048014963, 12000,
+              2500,121.5592902752412, 24.658964292017885, 12000,
+              3500,121.56445881860067, 25.16649023047563, 5000,
+              4500,119.94263373897657, 25.49632056739945, 12000,
+              5500,119.30910179629008, 25.559938450361965, 5000,
+              6500,118.96295053426707, 25.571485127594467, 0,
             ],
+          },
+          polygon: {
+            positions: {
+              // 坐标组
+              cartographicDegrees: [
+                118.93830177292894, 25.488280583435404, 300,
+                119.14034602637892, 25.32388938213355, 800,
+                119.43064375816327, 25.230148210056235, 1500,
+                120.93105921868252, 24.769194048014963, 2500,
+                121.5592902752412, 24.658964292017885, 3500,
+                121.56445881860067, 25.16649023047563, 4500,
+                119.94263373897657, 25.49632056739945, 5500,
+                119.30910179629008, 25.559938450361965, 6500,
+                118.96295053426707, 25.571485127594467, 0,
+              ],
+            },
+            material: {
+              solidColor: {
+                color: {
+                  rgba: [255, 0, 0, 128],
+                },
+              },
+            },
+            outline: true,
+            clampToGround: true,
+            outlineColor: {
+              rgba: [0, 0, 0, 255],
+            },
           },
         },
       ];
 
-      // 加载数据
-      viewer.dataSources
-        .add(Cesium.CzmlDataSource.load(czml_team))
-        .then(function (ds) {
-          // 获取模型对象
-          entityB2 = ds.entities.getById("flying_follow_team");
-
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+      Cesium.CzmlDataSource.load(czml_team).then(function(dataSource) {
+    viewer.dataSources.add(dataSource);
+    viewer.zoomTo(dataSource);
+        // 获取模型对象
+          entityB2 = dataSource.entities.getById("flying_follow_team");
+          console.log(entityB2);
+          // entityB2.show = false;
           viewer.trackedEntity = entityB2;
-
-          // 获取当前模型方向和位置
+              // 获取当前模型方向和位置
           const orientation = entityB2.orientation;
           const position = entityB2.position;
 
@@ -158,7 +195,60 @@ export default defineComponent({
           }
 
           onTickEvent = viewer.clock.onTick.addEventListener(adjust);
-        });
+});
+      // 加载数据
+      // viewer.dataSources
+      //   .add(Cesium.CzmlDataSource.load(czml_team))
+      //   .then(function (ds) {
+      //     // 获取模型对象
+      //     entityB2 = ds.entities.getById("flying_follow_team");
+      //     console.log(entityB2);
+      //     // entityB2.show = false;
+      //     viewer.trackedEntity = entityB2;
+
+      //     // 获取当前模型方向和位置
+      //     const orientation = entityB2.orientation;
+      //     const position = entityB2.position;
+
+      //     // 实时调整位置
+      //     function adjust() {
+      //       if (viewer.clock.shouldAnimate === true) {
+      //         let ori = orientation.getValue(viewer.clock.currentTime); // 获取偏向角
+      //         let center = position.getValue(viewer.clock.currentTime); // 获取位置
+
+      //         // 1、由四元数计算三维旋转矩阵
+      //         var mtx3 = Cesium.Matrix3.fromQuaternion(ori);
+
+      //         // 2、计算四维转换矩阵：
+      //         var mtx4 = Cesium.Matrix4.fromRotationTranslation(mtx3, center);
+
+      //         // 3、计算角度：
+      //         var hpr = Cesium.Transforms.fixedFrameToHeadingPitchRoll(mtx4);
+
+      //         // 获取角度（弧度）
+      //         const headingTemp = hpr.heading;
+      //         const pitchTemp = hpr.pitch;
+
+      //         // 调整角度为第一人称
+      //         const heading = Cesium.Math.toRadians(
+      //           Cesium.Math.toDegrees(headingTemp) + 90
+      //         );
+      //         const pitch = Cesium.Math.toRadians(
+      //           Cesium.Math.toDegrees(pitchTemp) - 12
+      //         );
+      //         // 视角高度，根据模型大小调整
+      //         const range = 140.0;
+
+      //         // 动态改变模型视角
+      //         viewer.camera.lookAt(
+      //           center,
+      //           new Cesium.HeadingPitchRange(heading, pitch, range)
+      //         );
+      //       }
+      //     }
+
+      //     onTickEvent = viewer.clock.onTick.addEventListener(adjust);
+      //   });
     };
     const reloadFunc = () => {
       const { viewer } = store.state;
@@ -235,7 +325,7 @@ export default defineComponent({
 
       viewer.imageryLayers.addImageryProvider(iboMap);
 
-    //   return viewer;
+      //   return viewer;
     };
 
     /**
@@ -328,7 +418,7 @@ export default defineComponent({
       //   viewer.scene.primitives.removeAll();
     };
     onMounted(() => {
-        // init();
+      // init();
       clipModel();
     });
     onUnmounted(() => {
@@ -347,8 +437,8 @@ export default defineComponent({
   },
 });
 </script>
-    
-    <style scoped>
+
+<style scoped>
 /* @bgc:#000; */
 #cesiumContainer {
   background: #000;
@@ -425,4 +515,3 @@ export default defineComponent({
   justify-content: space-between;
 }
 </style>
-    

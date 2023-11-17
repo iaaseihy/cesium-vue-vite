@@ -27,8 +27,13 @@ export const BING_IMG_URL = 'https://dev.virtualearth.net'
 export const LOCAL_TERRAIN_URL = 'http://localhost:6060/Data/TERRAIN'// 本地全球dem
 
 // 倾斜摄影
-export const DAYANTA3DTILES = 'http://localhost:6060/Data/dayanta3dtiles/tileset.json' // 大雁塔倾斜摄影
+export const DAYANTA3DTILES = 'http://127.0.0.1:6060/Data/dayanta3dtiles/tileset.json' // 大雁塔倾斜摄影
 
+// 千桐倾斜摄影
+export const QIANTONG3DTILES = 'http://127.0.0.1:6060/Data/qiantong/tileset.json' // 千桐倾斜摄影
+
+// SOURCE目录下的倾斜摄影
+export const SOURCE3DTILES = 'http://127.0.0.1:6060/Data/Source/3DTiles/dayanta3Dtiles/tileset.json' // SOURCE目录下的倾斜摄影
 // 白膜
 export const BAIMO3DTILES = 'http://localhost:6060/Data/BAIMO/building/tileset.json' // 白膜
 

@@ -4,19 +4,21 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-09-08 16:08:10
+ * @LastEditTime: 2023-11-16 15:29:17
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
   <div style="position: absolute; top: 10px; left: 10px; z-index: 9">
     <el-button @click="addWMSLayer()">添加wms图层</el-button>
+    <el-button @click="addDIVLabel()">点击添加div标签</el-button>
+    <el-button @click="addLabelIndex()">点击label遮挡</el-button>
     <el-button @click="handleClear()">清空</el-button>
   </div>
 </template>
 
 <script>
 import * as Cesium from "cesium";
-import { defineComponent, onMounted, onUnmounted, createApp } from "vue";
+import { defineComponent, onMounted, onUnmounted, createApp, reactive } from "vue";
 import { useStore } from "vuex";
 import CesiumContainer from "@/views/CesiumContainer.vue";
 import { getGeojson } from "@/api/api.js";
@@ -27,6 +29,10 @@ import Label from "./index.vue";
 import DivLabel from "./divLabel.js";
 import InfoTool from "../../../commonJS/InfoTool.js";
 const WindowVm = defineComponent(Label);
+let infos = reactive({
+  pups: [],
+});
+let element;
 export default defineComponent({
   components: { CesiumContainer },
   setup() {
@@ -141,12 +147,12 @@ export default defineComponent({
       }
       console.log(poinEntity[id]);
 
-      // 方法一
-      bubbles = new Bubble(
-        Object.assign(poinEntity[id], {
-          viewer: viewer,
-        })
-      );
+      // // 方法一
+      // bubbles = new Bubble(
+      //   Object.assign(poinEntity[id], {
+      //     viewer: viewer,
+      //   })
+      // );
 
       // 方法二
       let val = Object.assign(poinEntity[id], {
@@ -183,8 +189,8 @@ export default defineComponent({
       //      position: cartesian33, html: html3, className: "earth-popup-imgbg-blue", popPosition: "leftbottom"
       //  }, onMove)
 
-      // 方法三
-      addDivLabel(val, title, state, valId);
+      // // 方法三
+      // addDivLabel(val, title, state, valId);
 
       // 方法四
       pickEntity = new InfoTool(viewer);
@@ -194,6 +200,7 @@ export default defineComponent({
         title,
       };
       pickEntity.add(pickPos);
+
     };
     const leftDownAction = () => {
       const { viewer } = store.state;
@@ -290,6 +297,127 @@ export default defineComponent({
       // search();
       // leftDownAction();
     };
+    const addDIVLabel = () => {
+      const { viewer, imageryProvider } = store.state;
+      window._viewer = viewer;
+      viewer.scene.globe.depthTestAgainstTerrain = true // 开启地形遮挡
+      var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  handler.setInputAction(function (event) {
+    console.log(event);
+    var windowpos = viewer.camera.getPickRay(event.position);
+    // 先移除之前添加的标签
+    // 方法一添加的 只能设置display 为 none
+    infos.pups.forEach((pup) => {
+      var pupdiv = document.getElementById(pup.id);
+      console.log(pupdiv.attributes[1].value);
+      pupdiv.style.display = "none";
+    })
+    // 方法二添加的获取 div 标签下的所有子节点 并删除
+    // let pupParentDiv = document.getElementsByClassName('divMark');
+    // if (pupParentDiv && pupParentDiv.length > 0) {
+    //   for (var i = pupParentDiv.length - 1; i >= 0; i--) { // 一定要倒序，正序是删不干净的，可自行尝试
+    //     pupParentDiv.removeChild(pupParentDiv[i]);
+    //   }
+    // }
+
+    if (windowpos) {
+      var cartesian2 = viewer.camera.pickEllipsoid(
+        event.position,
+        viewer.scene.globe.ellipsoid
+      );
+      var carto2 =
+        viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian2);
+      creatPup(infos, { id: "pupdiv" + Math.random(10000), position: carto2 }, viewer);
+
+      console.log(carto2);
+    }
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(107.0253, 30.8710, 50000),
+  });
+  //自定义气泡是一个div 标签
+
+  // 每帧都要更新标签的位置
+  viewer.scene.postRender.addEventListener(() => {
+    console.log("pups", infos.pups);
+    infos.pups.forEach((pup) => {
+      console.log(pup.position);
+      var worldcoodinate = Cesium.Cartesian3.fromRadians(
+        pup.position.longitude,
+        pup.position.latitude,
+        pup.position.height
+      );
+      var screenpos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(
+        window._viewer.scene,
+        worldcoodinate
+      );
+      console.log(screenpos);
+      var pupdiv = document.getElementById(pup.id);
+      pupdiv.style.top = screenpos.y + "px";
+      pupdiv.style.left = screenpos.x + "px";
+      //  $("#"+pup.id).css("position","absolute");
+      //  $("#"+pup.id).css("top",screenpos.y+"px");
+      //  $("#"+pup.id).css("left",screenpos.x+"px");
+    });
+  });
+    };
+    const addLabelIndex = () => {
+      const { viewer } = store.state;
+      // 创建 LabelCollection 实例
+var labels = viewer.scene.primitives.add(new Cesium.LabelCollection());
+ 
+ // 创建第一个文字标签
+ var label1 = labels.add({
+   text: 'Label 1',
+   position: Cesium.Cartesian3.fromDegrees(-80.50, 35.14,300),
+   font: '24px sans-serif',
+   zIndex: 3,
+ });
+  
+ // 创建第二个文字标签
+ var label2 = labels.add({
+   text: 'Label 2',
+   position: Cesium.Cartesian3.fromDegrees(-80.50, 35.14,300),
+   font: '24px sans-serif',
+   zIndex: 2,
+ });
+
+viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(
+          -80.50, 
+          35.14,
+          180
+        ),
+        orientation: {
+          heading: Cesium.Math.toRadians(0),
+          pitch: Cesium.Math.toRadians(-90),
+          roll: 0,
+        },
+      });
+    };
+    const creatPup = (infos, param, viewer) => {
+  var object = infos.pups.find((pup) => {
+    return pup.id == param.id;
+  });
+  let html = new Array;
+  if (!object) {
+    object = new Object();
+    object.id = param.id;
+    object.position = param.position;
+    infos.pups.push(object);
+    var divmark =
+      "<div id='" +
+      param.id +
+      "' style='position:absolute;width:200px;height:50px;background-color:#42b983; border-radius: 10px;' ></div>";
+    // 方法一
+      // $("#" + window._viewer._container.id).append(divmark);
+      //方法二
+    element = document.createElement("div");
+    element.innerHTML = divmark;
+    element.className='divMark';
+    viewer.container.appendChild(element);
+  }
+};
     const search = () => {
       const { viewer } = store.state;
       handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -423,6 +551,8 @@ export default defineComponent({
       handleClear,
       loadTileset,
       addWMSLayer,
+      addDIVLabel,
+      addLabelIndex,
     };
   },
 });

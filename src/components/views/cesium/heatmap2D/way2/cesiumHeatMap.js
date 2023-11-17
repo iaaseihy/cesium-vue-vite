@@ -72,14 +72,14 @@ export class CesiumHeatmap {
           ".3": "blue",
           ".5": "green",
           ".7": "yellow",
-          ".95": "red",
+          ".95": "blue",
 
           // 0.05: "rgb(0,0,255)",
           // 0.25: "rgb(0 255 127)",
           // 0.45: "rgb(0,255,0)",
           // 0.65: "rgb(255 255 0)",
           // 0.85: "rgb(255 165 0)",
-          // "1.00": "rgb(255,0,0)",
+          // "1.00": "rgb(0,0,255)",
         },
       };
       const _options = this.initOptions.heatmapOptions

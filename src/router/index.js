@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-05-29 16:56:11
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-09-06 17:35:00
+ * @LastEditTime: 2023-11-03 16:32:36
  */
 
 // import { createRouter, createWebHashHistory } from 'vue-router'
@@ -236,7 +236,7 @@ const routes = [
         },
       },
       {
-        path: '/roaming',
+        path: '/roaming2',
         name: 'Roaming',
         component: () => import('@/components/views/cesium/roaming/FPPRoming.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
         meta: {
@@ -269,6 +269,15 @@ const routes = [
         meta: {
           title: "反选遮罩",
           activePath: "/cesium/trackMatte",
+        },
+      },
+      {
+        path: '/cloud',
+        name: 'Cloud',
+        component: () => import('@/components/views/cesium/cloud/cloud.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "添加云层",
+          activePath: "/cesium/cloud",
         },
       },
       {

@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-05-30 14:19:13
+ * @LastEditTime: 2023-10-16 10:51:33
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -121,11 +121,11 @@ export default defineComponent({
     const addThroughRoadEntity = () => {
       const { viewer } = store.state;
       const material = new RoadThroughLine(
-        1000,
+        3000,
         "static/texture/spriteline.png"
       );
       // 道路闪烁线
-      Cesium.GeoJsonDataSource.load("static/geojson/qingdaoRoad.geojson").then(
+      Cesium.GeoJsonDataSource.load("static/geojson/waterRoad.geojson").then(
         function (dataSource) {
           viewer.dataSources.add(dataSource);
           const entities = dataSource.entities.values;
@@ -133,8 +133,9 @@ export default defineComponent({
           // viewer.zoomTo(entities);
           for (let i = 0; i < entities.length; i++) {
             let entity = entities[i];
-            entity.polyline.width = 1.7;
+            entity.polyline.width = 17;
             entity.polyline.material = material;
+            entity.polyline.clampToGround = true;
           }
         }
       );

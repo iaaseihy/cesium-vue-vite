@@ -4,7 +4,7 @@
  * @Author: caochaoqiang
  * @Date: 2023-02-03 11:43:18
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-28 15:32:35
+ * @LastEditTime: 2023-11-07 16:19:05
 -->
 <template>
   <el-row>
@@ -979,6 +979,100 @@ export default {
       const modelClip = new ModelClipPlan(viewer, modelUrl);
       console.log(modelClip);
     },
+//     // 模型压平方法
+//    handleModelFlattening(polygonPos) {
+//     let customerShader = new Cesium.CustomShader({
+//       lightingModel: Cesium.LightingModel.UNLIT,  // 照明模型
+//       uniforms: {
+//         u1pos: {
+//           type: Cesium.UniformType.VEC3,
+//           value: polygonPos[0]
+//         },
+//         u2pos: {
+//           type: Cesium.UniformType.VEC3,
+//           value: polygonPos[1]
+//         },
+//         u3pos: {
+//           type: Cesium.UniformType.VEC3,
+//           value: polygonPos[2]
+//         },
+//         u4pos: {
+//           type: Cesium.UniformType.VEC3,
+//           value: polygonPos[3]
+//         }
+//       },
+//       vertexShaderText: `
+//               void vertexMain(VertexInput vsInput, inout czm_modelVertexOutput vsOutput) {
+//                     vec3 p = vsOutput.positionMC;
+//                     float px = p.x;
+//                     float pz = p.z;
+//                     vec4 u1posMC = czm_inverseModel * vec4(u1pos,1.);
+//                     vec4 u2posMC = czm_inverseModel * vec4(u2pos,1.);
+//                     vec4 u3posMC = czm_inverseModel * vec4(u3pos,1.);
+//                     vec4 u4posMC = czm_inverseModel * vec4(u4pos,1.);
+//                     bool flag = false;
+//                     vec4 tem1;
+//                     vec4 tem2;
+//                     for(int i=0;i<4;i++){
+//                       if(i == 0) {
+//                         tem1 = u1posMC;
+//                         tem2 = u4posMC;
+//                       }
+//                       else if(i == 1){
+//                         tem1 = u2posMC;
+//                         tem2 = u1posMC;
+//                       }
+//                       else if(i == 2){
+//                         tem1 = u3posMC;
+//                         tem2 = u2posMC;
+//                       }
+//                       else {
+//                         tem1 = u4posMC;
+//                         tem2 = u3posMC;
+//                       }
+//                       float sx = tem1.x;
+//                       float sz = tem1.z;
+//                       float tx = tem2.x;
+//                       float tz = tem2.z;
+//                       if((sz < pz && tz >= pz) || (sz >= pz && tz < pz)) {
+//                         float x = sx + (pz - sz) * (tx - sx) / (tz - sz);
+//                         if(x > px) {
+//                             flag = !flag;
+//                         }
+//                       }
+//                     }
+//                     if(flag){
+//                       vsOutput.positionMC.y = tem1.y ;
+//                     }
+//                   }
+//               `
+//     });
+//     tileset.customShader = customerShader;
+//   }
+// // 原四车间办公室 -- 压平
+//   let fourOfficePoints = [
+//         {
+//           x: -1392611.035165479,
+//           y: 5269607.04472273,
+//           z: 3301327.988611768
+//         },
+//         {
+//           x: -1392549.9521732894,
+//           y: 5269638.119215414,
+//           z: 3301319.116597225
+//         },
+//         {
+//           x: -1392566.6055199371,
+//           y: 5269657.434260002,
+//           z: 3301266.7863044334
+//         },
+//         {
+//           x: -1392637.4656692627,
+//           y: 5269630.69928024,
+//           z: 3301279.211488958
+//         },
+//   ]
+//   handleModelFlattening(fourOfficePoints)
     // 添加3dTiles倾斜模型并压平
     add3DTiles(viewer) {
       const modelArr = [];

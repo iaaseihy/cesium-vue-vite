@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-09-22 10:31:43
+ * @LastEditTime: 2023-10-10 10:37:47
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -14,6 +14,7 @@
     <el-button @click="reflectWater()">水体镜面反射折射</el-button>
     <el-button @click="induationAnalysis()">开始淹没分析</el-button>
     <el-button @click="induationAnalysis2()">开始淹没分析2</el-button>
+    <el-button @click="induationAnalysis3()">开始淹没分析3</el-button>
     <el-button @click="clearAllEntities()">清除</el-button>
   </div>
 </template>
@@ -34,6 +35,7 @@ import {
 } from "../../../commonJS/config.js";
 import measureAreaSpace from "./subMerged.js";
 import WaterPrimitive from "./WaterPrimitive.js";
+import SubmergenceAnalysis from './SubmergenceAnalysis.js'
 export default defineComponent({
   components: { CesiumContainer, ElMessage },
   setup() {
@@ -323,9 +325,77 @@ export default defineComponent({
 
     const reflectWater = () => {
       const { viewer } = store.state;
+      let reflectPoints = [
+    {
+        "longitude": 1.9024344301105927,
+        "latitude": 0.5396880608740867,
+        "height": 0
+    },
+    {
+        "longitude": 1.9025120266858322,
+        "latitude": 0.5397125038444289,
+        "height": 0
+    },
+    {
+        "longitude": 1.9026495328003878,
+        "latitude": 0.5397558201985683,
+        "height": 0
+    },
+    {
+        "longitude": 1.9031166053357007,
+        "latitude": 0.5397907829832101,
+        "height": 0
+    },
+    {
+        "longitude": 1.9036898781889422,
+        "latitude": 0.539890333683952,
+        "height": 0
+    },
+    {
+        "longitude": 1.9042484221039062,
+        "latitude": 0.5399759176316973,
+        "height": 0
+    },
+    {
+        "longitude": 1.9042015622300579,
+        "latitude": 0.5403130845602953,
+        "height": 0
+    },
+    {
+        "longitude": 1.9041886074887793,
+        "latitude": 0.5403991245102174,
+        "height": 0
+    },
+    {
+        "longitude": 1.9035689378324445,
+        "latitude": 0.5403689650811169,
+        "height": 0
+    },
+    {
+        "longitude": 1.9028713366070187,
+        "latitude": 0.5402505294640828,
+        "height": 0
+    },
+    {
+        "longitude": 1.9024332126890646,
+        "latitude": 0.5402366794737297,
+        "height": 0
+    },
+    {
+        "longitude": 1.902417222801841,
+        "latitude": 0.5402361740019862,
+        "height": 0
+    },
+    {
+        "longitude": 1.9024344301105927,
+        "latitude": 0.5396880608740867,
+        "height": 0
+    }
+];
       const aaa = new WaterPrimitive({
         scene: viewer.scene,
-        positions: activeShapePoints,
+        // positions: activeShapePoints,
+        positions: reflectPoints,
         height: 10,
         rippleSize: 100,
       });
@@ -501,6 +571,14 @@ export default defineComponent({
       viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(102.5, 30.0, 50000),
       });
+    };
+
+    const induationAnalysis3 = () => {
+      const { viewer } = store.state;
+      let merge = new SubmergenceAnalysis(viewer, true, maxWaterHeight, minWaterHeight, 1, true, activeShapePoints,1)
+      if (merge) {
+        merge.start();
+      }
     };
 
     const createWaterPrimitive2 = () => {
@@ -1091,6 +1169,7 @@ export default defineComponent({
       BAIMOEditWay2,
       induationAnalysis,
       induationAnalysis2,
+      induationAnalysis3,
       clearAllEntities,
     };
   },
