@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: liubofang<421419567@qq.com>
  * @Date: 2021-06-15 15:08:22
- * @LastEditTime: 2023-09-01 10:44:02
+ * @LastEditTime: 2024-08-19 14:44:19
 -->
 <template>
   <div id="cesiumContainer">
@@ -242,12 +242,12 @@ export default {
                    //将笛卡尔三维坐标转为地图坐标（弧度）
                    var cartographic=viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
                    //将地图坐标（弧度）转为十进制的度数
-                    var lat_String=Cesium.Math.toDegrees(cartographic.latitude).toFixed(4);
-                    var log_String=Cesium.Math.toDegrees(cartographic.longitude).toFixed(4);
-                    var alti_String=(viewer.camera.positionCartographic.height/1000).toFixed(2);
+                    var lat_String=Cesium.Math.toDegrees(cartographic.latitude).toFixed(7);
+                    var log_String=Cesium.Math.toDegrees(cartographic.longitude).toFixed(7);
+                    var alti_String=(viewer.camera.positionCartographic.height/1000).toFixed(5);
                     let elec_String;
                     if (viewer.scene.globe.getHeight(cartographic)) {
-                      elec_String =viewer.scene.globe.getHeight(cartographic).toFixed(4);
+                      elec_String =viewer.scene.globe.getHeight(cartographic).toFixed(7);
                     }
                     longitude_show.innerHTML=log_String;
                     latitude_show.innerHTML=lat_String;
@@ -380,7 +380,7 @@ export default {
   position: absolute;
     display: block;
     bottom: 40px;
-    right: -210px;
+    right: 0%;
     width: 340px;
     height: 30px;
     z-index: 100;

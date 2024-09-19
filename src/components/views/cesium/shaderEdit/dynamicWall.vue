@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-09-12 17:05:40
+ * @LastEditTime: 2024-09-19 17:11:01
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -21,7 +21,6 @@
     <el-button @click="boolInside()">判断点是否在泛光墙内</el-button>
     <el-button @click="BAIMOEdit()">白膜变色(鼠标点击事件报错)</el-button>
     <el-button @click="BAIMOEditWay2()">白膜变色2(点击白膜点击处生成标签)</el-button>
-    <el-button @click="modifyMap()">添加暗色电子地图</el-button>
     <el-button @click="handleClear()">清空</el-button>
   </div>
 </template>
@@ -1012,84 +1011,7 @@ export default defineComponent({
       }
       handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
     };
-    /* Cesium修改地图颜色代码(暗色电子地图) */
-    const modifyMap = () => {
-      const { viewer } = store.state;
-      // // 获取地图影像图层
-      // const baseLayer = viewer.imageryLayers.get(0);
-      // // 设置两个变量，用来判断是否进行颜色的翻转和过滤
-      // const options = {
-      //   invertColor: true,
-      //   filterRGB: [0, 50, 100],
-      // };
-      // // 更改地图着色器代码
-      // const baseFragShader =
-      //   viewer.scene.globe._surfaceShaderSet.baseFragmentShaderSource.sources;
-      // for (let i = 0; i < baseFragShader.length; i++) {
-      //   // console.log(baseFragShader[i])
-      //   // console.log('------')
 
-      //   const strS =
-      //     "color = czm_saturation(color, textureSaturation);\n#endif\n";
-      //   let strT =
-      //     "color = czm_saturation(color, textureSaturation);\n#endif\n";
-      //   if (options.invertColor) {
-      //     strT += `
-      // color.r = 1.0 - color.r;
-      // color.g = 1.0 - color.g;
-      // color.b = 1.0 - color.b;
-      // `;
-      //   }
-      //   if (options.filterRGB.length > 0) {
-      //     strT += `
-      // color.r = color.r * ${options.filterRGB[0]}.0/255.0;
-      // color.g = color.g * ${options.filterRGB[1]}.0/255.0;
-      // color.b = color.b * ${options.filterRGB[2]}.0/255.0;
-      // `;
-      //   }
-      //   baseFragShader[i] = baseFragShader[i].replace(strS, strT);
-      // }
-
-      let options = {
-        //反色?
-        invertColor: true,
-        //滤镜值
-        filterRGB: [60, 145, 172],
-      };
-      DarkMap(viewer, options);
-    };
-    const DarkMap = (viewer, options) => {
-      const baseLayer = viewer.imageryLayers.get(0);
-      //以下几个参数根据实际情况修改,目前我是参照火星科技的参数,个人感觉效果还不错
-      baseLayer.brightness = options.brightness || 0.6;
-      baseLayer.contrast = options.contrast || 1.8;
-      baseLayer.gamma = options.gamma || 0.3;
-      baseLayer.hue = options.hue || 1;
-      baseLayer.saturation = options.saturation || 0;
-      const baseFragShader =
-        viewer.scene.globe._surfaceShaderSet.baseFragmentShaderSource.sources;
-      for (let i = 0; i < baseFragShader.length; i++) {
-        const strS =
-          "color = czm_saturation(color, textureSaturation);\n#endif\n";
-        let strT =
-          "color = czm_saturation(color, textureSaturation);\n#endif\n";
-        if (options.invertColor) {
-          strT += `
-      color.r = 1.0 - color.r;
-      color.g = 1.0 - color.g;
-      color.b = 1.0 - color.b;
-      `;
-        }
-        if (options.filterRGB.length > 0) {
-          strT += `
-      color.r = color.r * ${options.filterRGB[0]}.0/255.0;
-      color.g = color.g * ${options.filterRGB[1]}.0/255.0;
-      color.b = color.b * ${options.filterRGB[2]}.0/255.0;
-      `;
-        }
-        baseFragShader[i] = baseFragShader[i].replace(strS, strT);
-      }
-    };
     // 图层里添加天地图电子地图
     const addTiandituMap = () => {
       const { viewer } = store.state;
@@ -1194,7 +1116,6 @@ export default defineComponent({
       handleClear,
       wllUp,
       wallCustom,
-      modifyMap,
       BAIMOEdit,
       BAIMOEditWay2,
       boolInside,

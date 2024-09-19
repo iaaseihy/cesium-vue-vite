@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-06-21 14:46:42
+ * @LastEditTime: 2024-08-26 14:51:15
 -->
 <template>
   <div>
@@ -119,6 +119,7 @@ export default defineComponent({
           orientation: new Cesium.VelocityOrientationProperty(property),
           model: {
             uri: "Cesium_Man.glb",
+            // uri: "https://antoco-data-admin.oss-cn-hangzhou.aliyuncs.com/test/3dFiles/%E4%BA%BA_1724653901794/tileset.json",
             minimumPixelSize: 24,
           },
           label: {

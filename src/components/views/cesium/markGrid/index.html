@@ -1,0 +1,48 @@
+<!--
+ * @Descripttion: 
+ * @version: v1.0
+ * @Author: CaoChaoqiang
+ * @Date: 2024-08-28 17:33:58
+ * @LastEditors: CaoChaoqiang
+ * @LastEditTime: 2024-08-29 08:58:25
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <!-- <script src="../Build/Cesium/Cesium.js"></script> -->
+    <script type="text/javascript" src="../../../../../public//static/Cesium1.62/Build/Cesium/Cesium.js"></script>
+    <link href="../../../../../public//static/Cesium1.62/Build//Cesium/Widgets/widgets.css" rel="stylesheet">
+    <!-- <link href="../libs/Cesium/Widgets/widgets.css" rel="stylesheet"> -->
+    <style>
+          /*@import url(../Build/Cesium/Widgets/widgets.css);*/
+      html,
+      body,
+      #cesiumContainer {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+    <script>
+
+       Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMmNjMWI3OC01OGZiLTQyYTYtYmU5YS0yMDhhZDY3YzQ3OTQiLCJpZCI6ODA0NzAsImlhdCI6MTY0MjkxMTg4OH0.5qLPbKGRp2LFxIOFH8apYS1UCS3NEFFz4QWH-FolRp4';
+       var viewer = new Cesium.Viewer('cesiumContainer',{
+           baseLayerPicker:false,   //默认地图设置为隐藏
+
+       });
+       const layer = viewer.imageryLayers.addImageryProvider(
+           new Cesium.IonImageryProvider({ assetId: 3812 })
+       );
+
+    </script>
+</body>
+</html>

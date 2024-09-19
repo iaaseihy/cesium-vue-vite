@@ -73,6 +73,7 @@ export default {
       that.viewer.scene.globe.depthTestAgainstTerrain = true
       //取消双击事件
       that.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
+      console.log('Cesium.Version', Cesium.VERSION);
     },
     /*
           添加雷达扫描线 地形遮挡开启   lon:-74.01296152309055 lat:40.70524201566827 height:129.14366696393927
