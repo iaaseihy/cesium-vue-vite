@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-11-10 15:52:57
+ * @LastEditTime: 2024-09-25 17:31:24
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -14,6 +14,14 @@
     <el-button @click="addBillboard()">添加billboard点位</el-button>
     <el-button @click="add3DtilesQiantong()">添加倾斜摄影原始</el-button>
     <el-button @click="add3DtilesTest()">添加倾斜摄影测试</el-button>
+    <el-button @click="add3DtilesSnow()">添加倾斜摄影积雪效果</el-button>
+    <el-button @click="add3DtilesSnow2()">添加倾斜摄影积雪效果2</el-button>
+    <el-button @click="close3DtilesSnow2()">关闭倾斜摄影积雪效果2</el-button>
+    <el-button @click="add3DtilesSnow3()">添加倾斜摄影积雪效果3</el-button>
+    <el-button @click="close3DtilesSnow3()">关闭倾斜摄影积雪效果3</el-button>
+    <el-button @click="close3DtilesSnow()">关闭倾斜摄影积雪效果</el-button>
+    <el-button @click="addHeightFog()">添加高度雾效果</el-button>
+    <el-button @click="closeHeightFog()">关闭高度雾效果</el-button>
   </div>
 </template>
 
@@ -23,6 +31,10 @@ import CesiumContainer from "@/views/CesiumContainer.vue";
 import { useStore } from "vuex";
 import * as Cesium from "cesium";
 import CloudEffectMaterialProperty from "./cloud.js";
+import SnowCoverStageEffect from "./SnowCoverStageEffect.js";
+import SnowCover from "./SnowCover.js";
+import SnowCoverEffect from "./SnowCoverEffect.js";
+import HeightFogEffect from "./HeightFogEffect.js";
 import {
   LOCAL_IMG_URL,
   LOCAL_TERRAIN_URL,
@@ -56,6 +68,10 @@ export default defineComponent({
     let waterHeightTimeer = 0;
     let waterPrimitive = undefined;
     let tempEntities = [];
+    let heightFog;
+    let snowEffect;
+    let snowEffect2;
+    let snowEffect3;
     const state = reactive({
       dragtool: null,
     });
@@ -1089,6 +1105,88 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
     throw(error);
   });
 };
+    const add3DtilesSnow = () => {
+      const { viewer } = store.state;
+      add3DtilesQiantong();
+      snowEffect = new SnowCoverStageEffect(viewer, {
+        alpha: 0.9,  // 设置积雪透明度
+        snowCoverage: 0.6  // 设置积雪覆盖率
+      });
+
+      // 调整积雪覆盖率
+      snowEffect.changeSnowCoverage(0.8);
+
+      // 显示或隐藏积雪效果
+      snowEffect.show(true);
+
+      // 动态修改透明度
+      snowEffect.changeAlpha(1.0);
+
+    };
+
+    const close3DtilesSnow = () => {
+      snowEffect && snowEffect.destroy();
+      snowEffect = null;
+    };
+
+    const add3DtilesSnow2 = () => {
+      const { viewer } = store.state;
+      add3DtilesQiantong();
+      snowEffect2 = new SnowCover(viewer)
+    };
+
+    const close3DtilesSnow2 = () => {
+      snowEffect2 && snowEffect2.clearSnowCover();
+      snowEffect2 = null;
+    };
+
+    const add3DtilesSnow3 = () => {
+      const { viewer } = store.state;
+      add3DtilesQiantong();
+      // 创建积雪效果实例
+      snowEffect3 = new SnowCoverEffect(viewer, {
+        snowColor: Cesium.Color.WHITE, // 可以传入自定义颜色
+      });
+
+      // 启用积雪效果
+      snowEffect3.show(true);
+
+      // 动态更改积雪颜色
+      // snowEffect3.changeSnowColor(Cesium.Color.LIGHTBLUE);
+
+      // // 关闭积雪效果
+      // snowEffect3.show(false);
+
+      // // 销毁积雪效果
+      // snowEffect3.destroy();
+    };
+
+    const close3DtilesSnow3 = () => {
+      // 销毁积雪效果
+      snowEffect3 && snowEffect3.destroy();
+      snowEffect3 = null;
+    };
+
+    const addHeightFog = () => {
+      const { viewer } = store.state;
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+      const cartographic = Cesium.Cartographic.fromDegrees(109.08, 30.94); // 获取河流地形高度
+      // const cartographic = Cesium.Cartographic.fromDegrees(119.4789507, 28.4416882); // 获取mars3d线上模型地形高度
+      const terrainHeight = viewer.scene.globe.getHeight(cartographic);
+
+      // 根据地形高度设置雾的高度
+      heightFog = new HeightFogEffect(viewer, {
+        height: terrainHeight + 100,  // 在地形高度基础上稍微增加一些
+        fogColor: Cesium.Color.WHITE.withAlpha(0.5),
+        alpha: 0.88
+      });
+    };
+    
+    const closeHeightFog = () => {
+      heightFog && heightFog.destroy();
+      heightFog = null;
+    };
+
     /**
      * @author:
      * @Date: 2022-04-11 16:44:42
@@ -1158,6 +1256,14 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       add3Dtiles,
       add3DtilesQiantong,
       add3DtilesTest,
+      add3DtilesSnow,
+      close3DtilesSnow,
+      add3DtilesSnow2,
+      close3DtilesSnow2,
+      add3DtilesSnow3,
+      close3DtilesSnow3,
+      addHeightFog,
+      closeHeightFog,
       addBillboard,
       clearAllEntities,
     };
