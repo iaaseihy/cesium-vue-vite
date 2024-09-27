@@ -4,7 +4,7 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2024-09-26 16:18:32
+ * @LastEditTime: 2024-09-27 17:27:53
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
@@ -15,6 +15,7 @@
     <el-button @click="add3Dtiles()">添加倾斜摄影</el-button>
     <el-button @click="addBillboard()">添加billboard点位</el-button>
     <el-button @click="add3DtilesQiantong()">添加倾斜摄影原始</el-button>
+    <el-button @click="flat3Dtiles()">倾斜摄影压平</el-button>
     <el-button @click="add3DtilesTest()">添加倾斜摄影测试</el-button>
     <el-button @click="add3DtilesSnow()">添加倾斜摄影积雪效果</el-button>
     <el-button @click="add3DtilesSnow2()">添加倾斜摄影积雪效果2</el-button>
@@ -996,7 +997,152 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       viewer.scene.primitives.add(tileset);
 
       viewer.zoomTo(tileset);
+      return tileset;
     };
+
+    const flat3Dtiles = () => {
+      const { viewer } = store.state;
+      let tileset = add3DtilesQiantong();
+      let isDrawing = true
+    let points=[]
+    let polygonPos = []
+    let polygon = undefined
+    var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
+    handler.setInputAction(evt=>{
+        const pickpos = viewer.scene.pickPosition(evt.position)
+        console.log(pickpos)
+        if(isDrawing){
+            if(polygonPos.length > 2 && !polygon){
+                polygon = viewer.entities.add({
+                    polygon:{
+                        hierarchy:new Cesium.CallbackProperty(()=>{
+                            return new Cesium.PolygonHierarchy(polygonPos)
+                        },false),
+                        material:Cesium.Color.fromCssColorString('#e36d62').withAlpha(0.5),
+                        perPositionHeight :true
+                    }
+                })
+            }
+            if(pickpos){
+                polygonPos.push(pickpos)
+                points.push(viewer.entities.add({
+                    position:pickpos,
+                    point:{
+                        color:Cesium.Color.DEEPPINK,
+                        pixelSize:10
+                    }
+                }))
+            }
+
+        }
+
+    },Cesium.ScreenSpaceEventType.LEFT_DOWN)
+    handler.setInputAction(evt=>{
+        if(polygon){
+            polygon.polygon=
+                {
+                    hierarchy:new Cesium.PolygonHierarchy(polygonPos),
+                    material:Cesium.Color.fromCssColorString('#a8e362').withAlpha(0.2),
+                    perPositionHeight :true
+                }
+            let customerShader = new Cesium.CustomShader({
+                lightingModel:Cesium.LightingModel.UNLIT,
+                uniforms:{
+                    u1pos:{
+                        type:Cesium.UniformType.VEC3,
+                        value:polygonPos[0]
+                    },
+                    u2pos:{
+                        type:Cesium.UniformType.VEC3,
+                        value:polygonPos[1]
+                    },
+                    u3pos:{
+                        type:Cesium.UniformType.VEC3,
+                        value:polygonPos[2]
+                    },
+                    u4pos:{
+                        type:Cesium.UniformType.VEC3,
+                        value:polygonPos[3]
+                    }
+                },
+                vertexShaderText:`
+                void vertexMain(VertexInput vsInput, inout czm_modelVertexOutput vsOutput) {
+                     vec3 p = vsOutput.positionMC;
+                     float px = p.x;
+                     float pz = p.z;
+
+                      vec4 u1posMC = czm_inverseModel * vec4(u1pos,1.);
+                      vec4 u2posMC = czm_inverseModel * vec4(u2pos,1.);
+                      vec4 u3posMC = czm_inverseModel * vec4(u3pos,1.);
+                      vec4 u4posMC = czm_inverseModel * vec4(u4pos,1.);
+
+                     bool flag = false;
+                     vec4 tem1;
+                     vec4 tem2;
+                     for(int i=0;i<4;i++){
+
+                          if(i == 0) {
+                           tem1 = u1posMC;
+                           tem2 = u4posMC;
+                          }
+                          else if(i == 1){
+                           tem1 = u2posMC;
+                           tem2 = u1posMC;
+                           }
+                          else if(i == 2){
+                           tem1 = u3posMC;
+                           tem2 = u2posMC;
+                           }
+                          else {
+                           tem1 = u4posMC;
+                           tem2 = u3posMC;
+                           }
+
+                         float sx = tem1.x;
+                         float sz = tem1.z;
+                         float tx = tem2.x;
+                         float tz = tem2.z;
+
+                         if((sx == px && sz ==pz) ||(tx == px && tz ==pz)){
+                             // return true;
+                             // return
+                         }
+
+                         if((sz < pz && tz >= pz) || (sz >= pz && tz < pz)) {
+
+                             float x = sx + (pz - sz) * (tx - sx) / (tz - sz);
+
+                             if(x == px) {
+
+                                 // return true;
+                                 // return
+                             }
+
+                             if(x > px) {
+                                 flag = !flag;
+                             }
+                              }
+
+                                  }//for end
+
+                                  if(flag){
+                                   vsOutput.positionMC.y = tem1.y ;
+                                  }
+                             }
+                `
+
+            })
+            tileset.customShader = customerShader
+        }
+
+
+        isDrawing = false
+
+
+    },Cesium.ScreenSpaceEventType.RIGHT_CLICK)
+
+    };
+
     const add3DtilesTest = () => {
   // let tileset1;
   // const translation = Cesium.Cartesian3.fromArray([0, 0, 0]);
@@ -1333,6 +1479,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       close3DtilesSnow3,
       add3DtilesSnow4,
       close3DtilesSnow4,
+      flat3Dtiles,
       addSnow,
       closeSnow,
       addHeightFog,
