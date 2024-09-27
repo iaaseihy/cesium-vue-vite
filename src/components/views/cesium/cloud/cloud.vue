@@ -4,12 +4,14 @@
  * @Author: CaoChaoqiang
  * @Date: 2023-02-03 10:20:33
  * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2024-09-25 17:31:24
+ * @LastEditTime: 2024-09-26 16:18:32
 -->
 <template>
   <cesium-container ref="cesiumContainer"> </cesium-container>
   <div style="position: absolute; top: 10px; left: 10px; z-index: 9">
     <el-button @click="addDynamicCloud()">添加动态云层</el-button>
+    <el-button @click="addSnow()">添加下雪效果</el-button>
+    <el-button @click="closeSnow()">关闭下雪效果</el-button>
     <el-button @click="add3Dtiles()">添加倾斜摄影</el-button>
     <el-button @click="addBillboard()">添加billboard点位</el-button>
     <el-button @click="add3DtilesQiantong()">添加倾斜摄影原始</el-button>
@@ -20,6 +22,8 @@
     <el-button @click="add3DtilesSnow3()">添加倾斜摄影积雪效果3</el-button>
     <el-button @click="close3DtilesSnow3()">关闭倾斜摄影积雪效果3</el-button>
     <el-button @click="close3DtilesSnow()">关闭倾斜摄影积雪效果</el-button>
+    <el-button @click="add3DtilesSnow4()">添加倾斜摄影积雪效果4</el-button>
+    <el-button @click="close3DtilesSnow4()">关闭倾斜摄影积雪效果4</el-button>
     <el-button @click="addHeightFog()">添加高度雾效果</el-button>
     <el-button @click="closeHeightFog()">关闭高度雾效果</el-button>
   </div>
@@ -34,7 +38,13 @@ import CloudEffectMaterialProperty from "./cloud.js";
 import SnowCoverStageEffect from "./SnowCoverStageEffect.js";
 import SnowCover from "./SnowCover.js";
 import SnowCoverEffect from "./SnowCoverEffect.js";
+import SnowEffect from './SnowEffect.js';
 import HeightFogEffect from "./HeightFogEffect.js";
+import {
+  CeateRainEffect,
+  CreateSnowEffect,
+  CeateFogEffect,
+} from "../../cesium/dam/mapjs/weather.js";
 import {
   LOCAL_IMG_URL,
   LOCAL_TERRAIN_URL,
@@ -72,6 +82,8 @@ export default defineComponent({
     let snowEffect;
     let snowEffect2;
     let snowEffect3;
+    let snowEffect4;
+    let snow;
     const state = reactive({
       dragtool: null,
     });
@@ -977,7 +989,8 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
     const add3DtilesQiantong = () => {
       const { viewer } = store.state;
       var tileset = new Cesium.Cesium3DTileset({
-        url: "//data.mars3d.cn/3dtiles/qx-shequ/tileset.json",
+        // url: "//data.mars3d.cn/3dtiles/qx-shequ/tileset.json",
+        url: "http://127.0.0.1:8080/Data/dayanta/tileset.json"
       });
 
       viewer.scene.primitives.add(tileset);
@@ -1167,6 +1180,62 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       snowEffect3 = null;
     };
 
+    const add3DtilesSnow4 = () => {
+      const { viewer } = store.state;
+      add3DtilesQiantong();
+      // 创建积雪效果实例
+      snowEffect4 = new SnowEffect(viewer, {
+        snowIntensity: 1.0  // 可根据需求调整积雪强度
+      });
+
+      // 启用积雪效果
+      snowEffect4.show(true);
+
+      // 动态调整积雪强度
+      snowEffect4.changeSnowIntensity(1.8);
+      viewer.scene.camera.frustum.far = 10000; // adjust far clipping plane to a reasonable distance
+
+
+      
+
+//       // 创建积雪效果对象
+// snowEffect4 = new SnowEffect(viewer, {
+//     alpha: 0.1, // 初始积雪厚度
+//     snowColor: Cesium.Color.WHITE // 初始积雪颜色，使用 Cesium.Color
+// });
+
+// // 调整积雪厚度
+// snowEffect4.changeAlpha(1.9);
+
+// // 显示或隐藏积雪效果
+// snowEffect4.show(true);
+
+    };
+
+    const addSnow = () => {
+      const { viewer } = store.state;
+      snow = CreateSnowEffect(viewer, 'snow');
+    };
+
+    const closeSnow = () => {
+      snow && snow.disableSnowEffect();
+      snow = null;
+
+      // 重新开启下雪效果
+      // if (snow) {
+      //   snow.enableSnowEffect();
+      // } else {
+      //   snow = CreateSnowEffect(viewer, 'snow');
+      // }
+    };
+
+    const close3DtilesSnow4 = () => {
+       // // 关闭积雪效果
+      snowEffect4.show(false);
+      // 销毁积雪效果
+      snowEffect4 && snowEffect4.destroy();
+      snowEffect4 = null;
+    }
     const addHeightFog = () => {
       const { viewer } = store.state;
       viewer.scene.globe.depthTestAgainstTerrain = true;
@@ -1262,6 +1331,10 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       close3DtilesSnow2,
       add3DtilesSnow3,
       close3DtilesSnow3,
+      add3DtilesSnow4,
+      close3DtilesSnow4,
+      addSnow,
+      closeSnow,
       addHeightFog,
       closeHeightFog,
       addBillboard,
