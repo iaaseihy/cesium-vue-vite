@@ -299,6 +299,15 @@ const routes = [
         },
       },
       {
+        path: '/multiView',
+        name: 'MultiView',
+        component: () => import('@/components/views/cesium/multiView/index.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
+        meta: {
+          title: "多屏分屏",
+          activePath: "/cesium/multiView",
+        },
+      },
+      {
         path: '/texture3D',
         name: 'Texture3D',
         component: () => import('@/components/views/cesium/texture3D/texture3D.vue'),// 路由懒加载，直接在这里引入了CesiumContainer并且赋值给了component;
