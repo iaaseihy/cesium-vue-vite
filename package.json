@@ -1,24 +1,23 @@
 {
   "name": "cesium-vue-vite",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@babel/core": "^7.11.0",
-    "@babel/eslint-parser": "^7.18.2",
-    "@dvgis/cesium-map": "^2.6.1",
     "@turf/turf": "^6.5.0",
     "@zip.js/zip.js": "^2.3.12",
     "axios": "^0.27.2",
     "cesium": "1.104.0",
     "cesium-popup-es6": "^0.28.0",
     "coordtransform": "^2.1.2",
-    "core-js": "^3.6.5",
     "dat.gui": "^0.7.9",
     "delaunator": "^5.0.0",
     "element-plus": "^2.2.17",
@@ -29,16 +28,11 @@
     "jsencrypt": "^3.0.0-rc.1",
     "jsqr": "^1.4.0",
     "mars3d": "^3.5.8",
-    "mars3d-cesium": "^1.105.0",
     "mockjs": "^1.1.0",
     "moment": "^2.29.4",
     "qs": "^6.11.0",
-    "status": "^0.0.13",
     "three": "^0.138.3",
     "three.path": "^1.0.1",
-    "vite": "^3.2.0",
-    "vite-plugin-cesium": "^1.2.22",
-    "vite-plugin-sass": "^0.1.0",
     "vue": "^3.5.41",
     "vue-router": "^4.0.0-0",
     "vue-slider-component": "^3.2.20",
@@ -49,38 +43,11 @@
     "@antv/l7": "^2.2.41",
     "@antv/l7-maps": "^2.2.41",
     "@jiaminghi/data-view": "^2.10.0",
-    "@open-wc/webpack-import-meta-loader": "^0.4.7",
-    "@types/three": "^0.150.2",
     "@vitejs/plugin-vue": "^3.1.0",
-    "eslint": "^7.5.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "eslint-plugin-vue": "^7.0.0",
     "less": "^4.1.3",
     "sass": "^1.26.5",
-    "sass-loader": "^8.0.2",
-    "strip-pragma-loader": "^1.0.0",
     "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2",
-    "typescript": "^4.7.4",
-    "vue-template-compiler": "^2.0.0"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "@vue/standard"
-    ],
-    "rules": {}
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+    "vite": "^3.2.0",
+    "vite-plugin-cesium": "^1.2.22"
+  }
 }

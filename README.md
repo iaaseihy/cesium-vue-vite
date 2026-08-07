@@ -1,50 +1,56 @@
-<!--
- * @Descripttion: 
- * @version: v1.0
- * @Author: CaoChaoqiang
- * @Date: 2023-04-07 14:35:28
- * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2023-04-12 10:29:51
--->
-# Vue 3 + Vite
+# Cesium + Vue 3 + Vite 三维展示平台
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 环境要求
 
-## Recommended IDE Setup
+- **Node.js** >= 16（推荐 18 LTS）
+- **npm** >= 8
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## 快速开始
 
-<p align="center">
-<img src="https://github.com/CesiumGS/cesium/wiki/logos/Cesium_Logo_Color.jpg" width="50%" />
-</p>
+```bash
+# 1. 安装依赖
+npm install
 
-  <p align="center">基于vite + 的cesium开发模板 (Cesium development template based on vite 3.x.x +)</p>
-  <p align="center">Version：vite 3.2.x + / Vue 3.0 + </p>
-  <p align="center">Branch： <a href="https://github.com/ShareQiu1994/cesium-vue/tree/master">JavaScript </a> / <a href="https://github.com/ShareQiu1994/cesium-vue/tree/typescript">TypeScript</a> </p>
+# 2. 启动开发服务器
+npm run dev
 
-  
-# cesium-vue
-
-##  项目安装(Project setup)
-```
-npm install / cnpm install / yarn install
-```
-### 编译并热部署的开发环境 (Compiles and hot-reloads for development)
-```
-npm run dev / cnpm run dev / yarn dev
+# 3. 浏览器访问 http://localhost:5173
 ```
 
-### 编译并压缩的生产环境 (Compiles and minifies for production)
+## 构建生产版本
+
+```bash
+npm run build
 ```
-npm run build / cnpm run build / yarn build
+
+## 技术栈
+
+| 技术 | 版本 | 说明 |
+|------|------|------|
+| Vue 3 | ^3.5 | 前端框架 |
+| Vite 3 | ^3.2 | 构建工具 |
+| Cesium | 1.104.0 | 三维地球引擎 |
+| Element Plus | ^2.2 | UI 组件库 |
+| Vuex 4 | ^4.0 | 状态管理 |
+| Vue Router 4 | ^4.0 | 路由 |
+| Three.js | ^0.138 | 3D 渲染（部分场景） |
+
+## 项目结构
+
+```
+src/
+  ├── components/       # 组件
+  │   ├── commonJS/     # 公共工具（createViewer, config 等）
+  │   └── views/        # 页面视图
+  │       ├── cesium/   # Cesium 相关功能页面
+  │       └── three/    # Three.js 相关页面
+  ├── router/           # 路由配置
+  ├── store/            # Vuex 状态管理
+  └── main.js           # 入口文件
 ```
 
-### 注意事项 (Notices)
+## 说明
 
-模板默认采用Cesium 1.96
-
-The default template is cesium 1.96. When you need to install cesium 1.96 +, it is recommended to use the **yarn** installation
-
-## License
-
-[MIT licensed](LICENSE).
+- 默认使用在线高德影像和 Cesium Ion 全球地形，无需本地数据服务
+- 倾斜摄影模型使用 mars3d 公共在线数据
+- 如需使用本地数据服务，修改 `src/components/commonJS/config.js` 中的 URL 即可

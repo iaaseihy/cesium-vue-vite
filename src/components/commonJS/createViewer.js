@@ -50,18 +50,17 @@ export const DEFAULT_UI_OPTIONS = {
   navigationInstructionsInitiallyVisible: false,
 }
 
-/** 默认影像 Provider（本地影像） */
+/** 默认影像 Provider（在线高德影像，无需本地服务） */
 export function createDefaultImageryProvider() {
   return new Cesium.UrlTemplateImageryProvider({
     url: LOCAL_IMG_URL,
     tilingScheme: new Cesium.WebMercatorTilingScheme(),
-    fileExtension: 'png',
     minimumLevel: 0,
     maximumLevel: 19,
   })
 }
 
-/** 默认地形 Provider（Google 全球地形） */
+/** 默认地形 Provider（Cesium Ion 在线全球地形，无需本地服务） */
 export function createDefaultTerrainProvider() {
   return Cesium.createWorldTerrain({
     requestVertexNormals: true,

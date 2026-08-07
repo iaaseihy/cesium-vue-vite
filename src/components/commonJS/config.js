@@ -5,9 +5,8 @@ import { Cesium3DTileStyle } from 'cesium'
 /**
  * 影像配置路径
  */
-// 本地全球影像
-// export const LOCAL_IMG_URL = 'http://localhost:6060/Data/BASE_DATA/bijiangquTileset/{z}/{x}/{y}.png'
-export const LOCAL_IMG_URL = 'http://localhost:6060/Data/BASE_DATA/yuhuatai19/{z}/{x}/{y}.png'
+// 默认在线高德影像（无需本地服务，任意电脑均可直接访问）
+export const LOCAL_IMG_URL = 'https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}'
 // 在线谷歌影像
 export const GOOGLE_IMG_URL = 'http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}&s=Gali'
 // 在线天地图矢量影像
@@ -24,18 +23,15 @@ export const BING_IMG_URL = 'https://dev.virtualearth.net'
 /**
  * 地形配置路径
  */
-export const LOCAL_TERRAIN_URL = 'http://localhost:6060/Data/TERRAIN'// 本地全球dem
+// 默认使用 Cesium Ion 在线地形（无需本地服务）
+export const LOCAL_TERRAIN_URL = ''
 
-// 倾斜摄影
-export const DAYANTA3DTILES = 'http://127.0.0.1:6060/Data/dayanta3dtiles/tileset.json' // 大雁塔倾斜摄影
-
-// 千桐倾斜摄影
-export const QIANTONG3DTILES = 'http://127.0.0.1:6060/Data/qiantong/tileset.json' // 千桐倾斜摄影
-
-// SOURCE目录下的倾斜摄影
-export const SOURCE3DTILES = 'http://127.0.0.1:6060/Data/Source/3DTiles/dayanta3Dtiles/tileset.json' // SOURCE目录下的倾斜摄影
-// 白膜
-export const BAIMO3DTILES = 'http://localhost:6060/Data/BAIMO/building/tileset.json' // 白膜
+// 倾斜摄影 —— 默认使用 mars3d 在线公共数据
+export const DAYANTA3DTILES = 'https://data.mars3d.cn/3dtiles/qx-shequ/tileset.json'
+export const QIANTONG3DTILES = 'https://data.mars3d.cn/3dtiles/qx-shequ/tileset.json'
+export const SOURCE3DTILES = 'https://data.mars3d.cn/3dtiles/qx-shequ/tileset.json'
+// 白膜 —— 使用 mars3d 在线公共数据
+export const BAIMO3DTILES = 'https://data.mars3d.cn/3dtiles/baimo-xian/tileset.json'
 
 /**
  * 默认分类单体模型样式设置
