@@ -42,6 +42,7 @@ export default defineConfig({
     target: 'esnext'
   },
   optimizeDeps: {
+    exclude: ['mars3d'],
     esbuildOptions: {
       target: 'esnext'
     }
