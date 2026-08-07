@@ -630,7 +630,11 @@ export default defineComponent({
       );
     };
     const handleClear = () => {
-      const { viewer } = store.state;
+      if (viewer && !viewer.isDestroyed()) {
+        viewer.destroy();
+        viewer = null;
+        window.viewer = undefined;
+      }
     };
     onMounted(() => {
       let key =

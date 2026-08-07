@@ -63,6 +63,7 @@
 
 <script>
 import * as Cesium from "cesium";
+import { createViewer, destroyViewer } from "@/components/commonJS/createViewer.js";
 import CanvasWindy from "./windy3D.js";
 // import { CanvasWindy } from "./canvasWindy2D.js";
 import windyData from "../canvasWindy2D/2017121300.json";
@@ -78,12 +79,6 @@ import {
   BaiduImageryProvider,
   AmapImageryProvider,
 } from "../../../commonJS/BaiduImageryProvider";
-import positiveX from "@img/SkyBox/00h+00.jpg";
-import negativeX from "@img/SkyBox/12h+00.jpg";
-import positiveY from "@img/SkyBox/06h+00.jpg";
-import negativeY from "@img/SkyBox/18h+00.jpg";
-import positiveZ from "@img/SkyBox/06h+90.jpg";
-import negativeZ from "@img/SkyBox/06h-90.jpg";
 
 var viewer, scene, windy, windycanvas;
 export default {
@@ -121,83 +116,23 @@ export default {
   mounted() {
     this.initViewer();
   },
+  beforeUnmount() {
+    if (viewer && !viewer.isDestroyed()) {
+      destroyViewer(viewer);
+      viewer = undefined;
+      window.cesiumViewer = undefined;
+    }
+  },
   methods: {
     initViewer() {
-      Cesium.Ion.defaultAccessToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjMmEyNjk5Ni02YjM4LTQ1NWUtOTk3Ny1mMzg5ZDFkZGEwYjYiLCJpZCI6MjYzODMsImlhdCI6MTY2NTczNDAwNX0.E8DSOKZagTy0leqyheZVzpjwrh3AactCSgQF3v22T2Q";
-      // 天地图影像
-      var imageryProvider1 = new Cesium.WebMapTileServiceImageryProvider({
-        url: "http://t0.tianditu.com/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=你的token",
-        layer: "tdtBasicLayer",
-        style: "default",
-        format: "image/jpeg",
-        tileMatrixSetID: "GoogleMapsCompatible",
+      // 使用工厂函数创建 Viewer（默认包含本地影像、Google地形、星空盒、隐藏credit）
+      viewer = createViewer("cesiumContainer", {
+        showSkyBox: true,
+        showFps: true,
+        setWindowGlobal: true,
       });
-      // 注记
-      var imageryProvider2 = new Cesium.WebMapTileServiceImageryProvider({
-        url: "http://t0.tianditu.com/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default.jpg&tk=你的token",
-        layer: "tdtAnnoLayer",
-        style: "default",
-        format: "image/jpeg",
-        tileMatrixSetID: "GoogleMapsCompatible",
-      });
-      // 本地影像
-      var imageryProvider = new Cesium.UrlTemplateImageryProvider({
-        url: LOCAL_IMG_URL,
-        //   url: GAODE_IMG_URL,
-        tilingScheme: new Cesium.WebMercatorTilingScheme(),
-        fileExtension: "png",
-        minimumLevel: 0,
-        maximumLevel: 19,
-      });
-      var terrainProvider = new Cesium.CesiumTerrainProvider({
-        url: LOCAL_TERRAIN_URL,
-        requestWaterMask: true, // 请求水波纹效果
-      });
-      var terrainProviderMars = new Cesium.CesiumTerrainProvider({
-        url: "http://data.marsgis.cn/terrain",
-        requestWaterMask: true, // 请求水波纹效果
-        requestVertexNormals: true,
-      });
-      var terrainProviderGoogle = Cesium.createWorldTerrain({
-        requestVertexNormals: true,
-        requestWaterMask: false,
-      });
-      // 百度
-      var baiduImageryProvider = new BaiduImageryProvider({
-        url: "http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1",
-        layer: "tdtAnnoLayer",
-        style: "default",
-        format: "image/jpeg",
-        maximumLevel: 18,
-        subdomains: this.subdomains,
-        tileMatrixSetID: "GoogleMapsCompatible",
-        crs: "WGS84", // 坐标系: WGS84 、BD09 、GCJ02，仅百度、高德有效
-        tilingScheme: null,
-      });
-      viewer = new Cesium.Viewer("cesiumContainer", {
-        terrainExaggeration: 0.95,
-        imageryProvider: imageryProvider,
-        // imageryProvider: baiduImageryProvider,
-        // terrainProvider: terrainProvider,
-        // terrainProvider: terrainProviderMars,
-        terrainProvider: terrainProviderGoogle,
-        baseLayerPicker: false,
-        fullscreenButton: false,
-        geocoder: false,
-        homeButton: false,
-        navigationHelpButton: false,
-        sceneModePicker: false,
-        timeline: false,
-        animation: false,
-        selectionIndicator: false,
-        infoBox: false,
-      });
-      // 通过imageryLayers获取图层列表集合
+      // 添加百度地图图层（页面特定逻辑）
       var layers = viewer.scene.imageryLayers;
-      // 图层列表集合的addImageryProvider方法:
-      // 两个参数，第一参数是一个ImageryProvider函数，这个函数的作用是新建一个图层;第二个参数是index，Number类型，作用是指定新插入图层在图层列表集合中的索引(位置)，若不指定，默认新图层添加在最上层
-      // 返回值是新添加到图层列表集合中的图层
       var baiduImageryLayer = layers.addImageryProvider(
         new BaiduImageryProvider({
           url: "http://online{s}.map.bdimg.com/onlinelabel/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=1&p=1",
@@ -207,16 +142,13 @@ export default {
           maximumLevel: 18,
           subdomains: this.subdomains,
           tileMatrixSetID: "GoogleMapsCompatible",
-          crs: "WGS84", // 坐标系: WGS84 、BD09 、GCJ02，仅百度、高德有效
+          crs: "WGS84",
           tilingScheme: null,
         })
       );
-      // get或set图层透明度，范围是0-1
       baiduImageryLayer.alpha = 0.6;
-
-      // get或set图层亮度，小于1图层更暗，大于1更亮
       baiduImageryLayer.brightness = 1.0;
-      // 添加高德地图并使用插件纠偏
+      // 添加高德地图图层（页面特定逻辑）
       var gaodeImageryLayer = layers.addImageryProvider(
         new AmapImageryProvider({
           url: "https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
@@ -226,47 +158,14 @@ export default {
           maximumLevel: 18,
           subdomains: this.subdomains,
           tileMatrixSetID: "GoogleMapsCompatible",
-          crs: "WGS84", // 坐标系: WGS84 、BD09 、GCJ02，仅百度、高德有效
+          crs: "WGS84",
           tilingScheme: null,
         })
       );
-      // get或set图层透明度，范围是0-1
       gaodeImageryLayer.alpha = 1.0;
-
-      // get或set图层亮度，小于1图层更暗，大于1更亮
       gaodeImageryLayer.brightness = 1.0;
-      // 修改影像图层颜色，变为暗色
-      console.log(
-        layers,
-        "terrainLayers: ",
-        viewer.scene.terrainProvider._layers
-      );
-
-      // 用于渲染星空的SkyBox对象
-      viewer.scene.skyBox = new Cesium.SkyBox({
-        sources: {
-          positiveX: positiveX,
-          negativeX: negativeX,
-          positiveY: positiveY,
-          negativeY: negativeY,
-          positiveZ: positiveZ,
-          negativeZ: negativeZ,
-        },
-      });
-      viewer._cesiumWidget._creditContainer.style.display = "none";
-
-      var ArcGisMap = new Cesium.UrlTemplateImageryProvider({
-        // 调用深蓝夜色影像服务
-        url: "https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}",
-      });
 
       viewer.scene.globe.showGroundAtmosphere = false;
-      // viewer.scene.globe.baseColor = Color.BLACK
-      // viewer.scene.globe.baseColor = new Cesium.Color(1, 1, 1, 0) // 修改地球颜色
-      // viewer.scene.primitives.add(createOsmBuildings())
-      // viewer.scene.camera.flyTo({
-      //   destination: Cartesian3.fromDegrees(-74.019, 40.6912, 750)
-      // })
       // 调整场景光照
       viewer.scene.light = new Cesium.DirectionalLight({
         direction: new Cesium.Cartesian3(
@@ -275,9 +174,6 @@ export default {
           -0.2833588392420772
         ),
       });
-
-      // 显示帧率
-      viewer.scene.debugShowFramesPerSecond = true;
       viewer.scene.globe.depthTestAgainstTerrain = false;
 
       // 添加3d tiles调试面板
@@ -287,7 +183,6 @@ export default {
 
       const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
       this.$store.state.cesiumDrawHandler = handler;
-      window.cesiumViewer = viewer;
       this.cesiumViewer = viewer;
       scene = viewer.scene;
 

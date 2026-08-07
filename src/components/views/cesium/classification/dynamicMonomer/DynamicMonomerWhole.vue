@@ -75,6 +75,13 @@ let selected, primitive, color, show, attribute; //动态单体化鼠标移动�
 let pickSelected, pickPrimitive, pickColor, pickShow, pickAttribute; //动态单体化鼠标点击事件相关对象
 
 export default {
+  beforeUnmount() {
+    if (viewer && !viewer.isDestroyed()) {
+      viewer.destroy();
+      viewer = null;
+      window.viewer = undefined;
+    }
+  },
   mounted() {
     let key =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZDhhOThhNy0zMzUzLTRiZDktYWM3Ni00NGI5MGY2N2UwZDUiLCJpZCI6MjQzMjYsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1ODUwMzUwNDh9.DYuDF_RPKe5_8w849_y-sutM68LM51O9o3bTt_3rF1w";

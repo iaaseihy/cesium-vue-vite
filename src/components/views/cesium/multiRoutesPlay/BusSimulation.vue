@@ -26,6 +26,7 @@ import {
   defineComponent,
   getCurrentInstance,
   onMounted,
+  onUnmounted,
   ref,
   watch,
 } from "vue";
@@ -195,6 +196,9 @@ export default defineComponent({
     };
     onMounted(() => {
       getCesiumDem();
+    });
+    onUnmounted(() => {
+      handleClear();
     });
     return {
       handleClear,

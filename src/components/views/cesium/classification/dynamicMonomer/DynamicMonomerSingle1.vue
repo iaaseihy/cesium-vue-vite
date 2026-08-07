@@ -81,6 +81,13 @@ let pickSelected, pickPrimitive, pickColor, pickShow, pickAttribute; //动态单
 let vertexPoints = []; //记录绘制的上、下顶点entity对象
 
 export default {
+  beforeUnmount() {
+    if (viewer && !viewer.isDestroyed()) {
+      viewer.destroy();
+      viewer = null;
+      window.viewer = undefined;
+    }
+  },
   mounted() {
     let key =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZDhhOThhNy0zMzUzLTRiZDktYWM3Ni00NGI5MGY2N2UwZDUiLCJpZCI6MjQzMjYsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1ODUwMzUwNDh9.DYuDF_RPKe5_8w849_y-sutM68LM51O9o3bTt_3rF1w";

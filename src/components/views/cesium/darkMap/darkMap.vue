@@ -51,6 +51,7 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import CesiumContainer from "@/views/CesiumContainer.vue";
+import { createViewer, destroyViewer } from "@/components/commonJS/createViewer.js";
 import ImageryTheme from "./imageryTheme.js";
 import ImageryThemeGL from "./imageryThemeGL.js";
 import modifyMapToDark from "./filterColor";
@@ -68,75 +69,24 @@ export default defineComponent({
       dragtool: null,
     });
     const init = () => {
-      // 这个 tk 只能在本域名下使用
-      var token = "2b7cbf61123cbe4e9ec6267a87e7442f";
-      // 服务域名
-      var tdtUrl = "https://t{s}.tianditu.gov.cn/";
-      // 服务负载子域
-      var subdomains = ["0", "1", "2", "3", "4", "5", "6", "7"];
-      viewer = new Cesium.Viewer("cesiumContainer", {
-        shouldAnimate: true,
-        selectionIndicator: true,
-        animation: false, //动画
-        homeButton: false, //home键
-        geocoder: false, //地址编码
-        baseLayerPicker: false, //图层选择控件
-        timeline: false, //时间轴
-        fullscreenButton: false, //全屏显示
-        infoBox: false, //点击要素之后浮窗
-        sceneModePicker: false, //投影方式  三维/二维
-        navigationInstructionsInitiallyVisible: false, //导航指令
-        navigationHelpButton: false, //帮助信息
-        selectionIndicator: false, // 选择
-        baseLayer: false,
-        // imageryProvider: new Cesium.WebMapTileServiceImageryProvider({
-        //   //影像底图
-        //   url:
-        //     "http://t{s}.tianditu.com/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=" +
-        //     token,
-        //   subdomains: subdomains,
-        //   layer: "tdtImgLayer",
-        //   style: "default",
-        //   format: "image/jpeg",
-        //   tileMatrixSetID: "GoogleMapsCompatible", //使用谷歌的瓦片切片方式
-        //   show: true,
-        // }),
+      // 使用工厂函数创建 Viewer，配置与原代码一致
+      viewer = createViewer("cesiumContainer", {
+        showSkyBox: false,      // 原代码未设置星空盒
+        showLatLng: true,       // 原代码有经纬度 HUD
+        showFps: false,
+        terrainProvider: false, // 原代码未设置地形
+        viewerOptions: {
+          baseLayer: false,     // 原代码禁用了默认底图
+          shouldAnimate: true,
+        },
       });
+      // 添加高德电子地图（原代码逻辑）
       viewer.imageryLayers.addImageryProvider(
         new Cesium.UrlTemplateImageryProvider({
           url: "https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=2&style=8&x={x}&y={y}&z={z}",
-
           maximumLevel: 18,
         })
       );
-      const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
-      // g跟随鼠标获取经纬度和海拔
-      let longitude_show = document.getElementById('longitude_show');
-      let latitude_show = document.getElementById('latitude_show');
-      let altitude_show = document.getElementById('altitude_show');
-      let elevation_show = document.getElementById('elevation_show');
-      let ellipsoid = viewer.scene.globe.ellipsoid;
-      handler.setInputAction(function(movement){
-            //捕获椭球体，将笛卡尔二维平面坐标转为椭球体的笛卡尔三维坐标，返回球体表面的点
-             var cartesian=viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
-              if(cartesian){
-                   //将笛卡尔三维坐标转为地图坐标（弧度）
-                   var cartographic=viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-                   //将地图坐标（弧度）转为十进制的度数
-                    var lat_String=Cesium.Math.toDegrees(cartographic.latitude).toFixed(7);
-                    var log_String=Cesium.Math.toDegrees(cartographic.longitude).toFixed(7);
-                    var alti_String=(viewer.camera.positionCartographic.height/1000).toFixed(5);
-                    let elec_String;
-                    if (viewer.scene.globe.getHeight(cartographic)) {
-                      elec_String =viewer.scene.globe.getHeight(cartographic).toFixed(7);
-                    }
-                    longitude_show.innerHTML=log_String;
-                    latitude_show.innerHTML=lat_String;
-                    altitude_show.innerHTML=alti_String;//视角高度 km
-                    elevation_show.innerHTML=elec_String;//海拔
-               }
-        },Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-      //   return viewer;
     };
     // 图层里添加天地图电子地图
     const addTiandituMap = () => {
@@ -440,7 +390,11 @@ export default defineComponent({
       viewer.scene.requestRender();
     };
     const handleClear = () => {
-      const { viewer } = store.state;
+      // 销毁 viewer 释放 WebGL 资源
+      if (viewer && !viewer.isDestroyed()) {
+        destroyViewer(viewer);
+        viewer = null;
+      }
     };
     onMounted(() => {
       // addTiandituMap();

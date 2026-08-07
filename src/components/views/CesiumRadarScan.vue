@@ -42,6 +42,12 @@ export default {
   mounted() {
     this.init()
   },
+  beforeUnmount() {
+    if (this.viewer && !this.viewer.isDestroyed()) {
+      this.viewer.destroy()
+      this.viewer = null
+    }
+  },
   methods: {
     init() {
       var that = this

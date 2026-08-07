@@ -18,6 +18,7 @@
   
   <script>
   import * as Cesium from 'cesium';
+  import { createViewer, destroyViewer } from '@/components/commonJS/createViewer.js';
   
   export default {
     name: 'App',
@@ -33,30 +34,27 @@
     mounted () {
       this.Init()
     },
+    beforeUnmount () {
+      if (this.viewer && !this.viewer.isDestroyed()) {
+        destroyViewer(this.viewer);
+        this.viewer = undefined;
+      }
+    },
     methods: {
       /* 初始化 */
       Init () {
-        // 引入个人token
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkYmJkNWQ3Mi0zOGVkLTQ5N2YtYTBmMy0wMDAyODZiMDMyZWYiLCJpZCI6ODQ2NzQsImlhdCI6MTY0NjQ0NTYxNX0.XkHX3rdysM4uUe5VTKDVEV3W2An33zyh4qAkFUac2fk'
-        // 设置取景器
-        this.viewer = new Cesium.Viewer('cesiumContainer', {
-          terrainProvider: Cesium.createWorldTerrain(),
-          selectionIndicator: false, // 不显示指示器小部件
-          infoBox: false, //  不显示信息框
-          sceneModePicker: false, // 不显示模式切换选项
-          baseLayerPicker: false,
-          navigationHelpButton: false,
-          animation: false,
-          shouldAnimate: false,
-          timeline: false,
-          geocoder: false,
-          homeButton: false,
-          // 添加ArcGIS在线影像底图
-          imageryProvider: new Cesium.UrlTemplateImageryProvider({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            subdomains: ['0', '1', '2', '3'],
-            tilingScheme: new Cesium.WebMercatorTilingScheme()
-          })
+        // 使用工厂函数创建 Viewer
+        this.viewer = createViewer('cesiumContainer', {
+          showSkyBox: false,
+          showFps: false,
+          viewerOptions: {
+            shouldAnimate: false,
+            imageryProvider: new Cesium.UrlTemplateImageryProvider({
+              url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+              subdomains: ['0', '1', '2', '3'],
+              tilingScheme: new Cesium.WebMercatorTilingScheme()
+            }),
+          },
         })
         // 若浏览器不支持pickPosition，显示报错信息
         if (!this.viewer.scene.pickPositionSupported) {

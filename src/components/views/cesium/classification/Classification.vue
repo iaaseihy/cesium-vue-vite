@@ -113,7 +113,12 @@ export default {
   mounted() {
     this.getCesiumDem();
   },
-  destroyed() {},
+  destroyed() {
+    if (viewer && !viewer.isDestroyed()) {
+      viewer.destroy();
+      viewer = null;
+    }
+  },
   methods: {
     // 保利倾斜摄影
     set3Dtitle2() {

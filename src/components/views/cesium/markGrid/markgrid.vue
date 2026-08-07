@@ -9,6 +9,7 @@
 <script type="module">
 // import * as Cesium from "../../../../../public/static/Cesium/Cesium.js";
 import * as Cesium from "cesium";
+import { createViewer, destroyViewer } from "@/components/commonJS/createViewer.js";
 import { Graticules } from "./grid.js";
 import CustomImageryProvider from "./reWrite.js";
 // import TileLonlatsImageryProvider from "./tilelonlatsimageryprovider1.js";
@@ -38,43 +39,29 @@ export default {
     //   url: "./sampledata/terrain/ctb-merger/",
     // });
 
-    window.viewer = viewer = new Cesium.Viewer("cesiumContainer", {
-      imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
-        url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
-      }),
-      // terrainProvider: Cesium.createWorldTerrain(),
-      // geocoder: true,
-      // homeButton: true,
-      // sceneModePicker: true,
-      // baseLayerPicker: true,
-      // navigationHelpButton: true,
-      // animation: true,
-      // timeline: true,
-      // fullscreenButton: true,
-      // vrButton: true,
-      // //关闭点选出现的提示框
-      // selectionIndicator: false,
-      // infoBox: false,
-      skyBox: false,
-      skyAtmosphere: false,
-      //   imageryProvider: mtdt,
-      contextOptions: {
-        webgl: {
-          alpha: true,
+    window.viewer = viewer = createViewer("cesiumContainer", {
+      showSkyBox: false,
+      showFps: false,
+      hideCredit: false,
+      terrainProvider: false, // 原代码未设置地形
+      setWindowGlobal: true,
+      viewerOptions: {
+        imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
+          url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+        }),
+        skyBox: false,
+        skyAtmosphere: false,
+        contextOptions: {
+          webgl: {
+            alpha: true,
+          },
         },
+        creditContainer: "creditContainer",
+        selectionIndicator: false,
+        sceneModePicker: true, // 原代码启用了投影方式控件
+        fullscreenButton: true, // 原代码启用了全屏按钮
       },
-      creditContainer: "creditContainer",
-      selectionIndicator: false,
-      animation: false, //是否显示动画控件
-      baseLayerPicker: false, //是否显示图层选择控件
-      geocoder: false, //是否显示地名查找控件
-      timeline: false, //是否显示时间线控件
-      sceneModePicker: true, //是否显示投影方式控件
-      navigationHelpButton: false, //是否显示帮助信息控件
-      infoBox: false, //是否显示点击要素之后显示的信息
-      fullscreenButton: true,
     });
-    viewer._cesiumWidget._creditContainer.style.display = "none"; // 隐藏版权
     // viewer.terrainProvider = terrainProvider;
     var lat = 42.006;
     var lon = 128.055;
@@ -186,6 +173,14 @@ export default {
     };
   },
   watch: {},
+  beforeUnmount() {
+    // 销毁 viewer 释放 WebGL 资源
+    if (viewer && !viewer.isDestroyed()) {
+      destroyViewer(viewer);
+      viewer = undefined;
+      window.viewer = undefined;
+    }
+  },
   methods: {
     initModel() {
       this.addAdditionalLayerOption(

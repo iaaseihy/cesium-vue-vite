@@ -159,12 +159,13 @@ export default {
   mounted() {
     // this.initDefaultView()
     this.initViewer();
-    // this.initEarthViewer()
-    // new Cesium.Viewer('mainCesiumContainer')
-    // 测量距离
-    // MeasureTool.measureLineSpace(viewer, null)
-    // // 测量面积
-    // MeasureTool.measureAreaSpace(viewer, null)
+  },
+  beforeUnmount() {
+    // 销毁 viewer 释放 WebGL 资源
+    if (this.viewer && !this.viewer.isDestroyed()) {
+      this.viewer.destroy();
+      this.viewer = null;
+    }
   },
   methods: {
     initDefaultView() {
