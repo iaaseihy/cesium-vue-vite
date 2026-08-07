@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# lock 文件 —— 项目同时支持 npm 和 pnpm，不锁定单一包管理器
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
