@@ -28,10 +28,16 @@
     <el-button @click="addHeightFog()">添加高度雾效果</el-button>
     <el-button @click="closeHeightFog()">关闭高度雾效果</el-button>
   </div>
+  <FlattenPanel
+    :visible="flattenPanelVisible"
+    :viewer="viewerRef"
+    :tileset="snowTileset"
+    @close="closeFlattenPanel"
+  />
 </template>
 
 <script>
-import { defineComponent, onMounted, onUnmounted, ref, reactive } from "vue";
+import { defineComponent, onMounted, onUnmounted, ref, reactive, computed } from "vue";
 import CesiumContainer from "@/views/CesiumContainer.vue";
 import { useStore } from "vuex";
 import * as Cesium from "cesium";
@@ -41,6 +47,7 @@ import SnowCover from "./SnowCover.js";
 import SnowCoverEffect from "./SnowCoverEffect.js";
 import SnowEffect from './SnowEffect.js';
 import HeightFogEffect from "./HeightFogEffect.js";
+import FlattenPanel from "./FlattenPanel.vue";
 import {
   CeateRainEffect,
   CreateSnowEffect,
@@ -56,7 +63,7 @@ import {
   SOURCE3DTILES,
 } from "../../../commonJS/config";
 export default defineComponent({
-  components: { CesiumContainer },
+  components: { CesiumContainer, FlattenPanel },
   setup() {
     const store = useStore();
     let entities;
@@ -89,6 +96,9 @@ export default defineComponent({
       dragtool: null,
     });
     let tileset1;
+    let snowTileset = ref(null); // 共享倾斜摄影模型（积雪和压平使用）
+    let flattenPanelVisible = ref(false);
+    const viewerRef = computed(() => store.state.viewer);
 
     //     const boundingSphere = BoundingSphere.fromPoints(positions);
     // viewer.camera.flyToBoundingSphere(boundingSphere)
@@ -1000,147 +1010,38 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       return tileset;
     };
 
-    const flat3Dtiles = () => {
+    /**
+     * 加载共享倾斜摄影模型（用于积雪效果和压平功能）
+     * 使用 mars3d 公共数据，需 enableModelExperimental 支持 CustomShader
+     */
+    const loadSnowTileset = async () => {
+      if (snowTileset.value) return snowTileset.value;
       const { viewer } = store.state;
-      let tileset = add3DtilesQiantong();
-      let isDrawing = true
-    let points=[]
-    let polygonPos = []
-    let polygon = undefined
-    var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
-    handler.setInputAction(evt=>{
-        const pickpos = viewer.scene.pickPosition(evt.position)
-        console.log(pickpos)
-        if(isDrawing){
-            if(polygonPos.length > 2 && !polygon){
-                polygon = viewer.entities.add({
-                    polygon:{
-                        hierarchy:new Cesium.CallbackProperty(()=>{
-                            return new Cesium.PolygonHierarchy(polygonPos)
-                        },false),
-                        material:Cesium.Color.fromCssColorString('#e36d62').withAlpha(0.5),
-                        perPositionHeight :true
-                    }
-                })
-            }
-            if(pickpos){
-                polygonPos.push(pickpos)
-                points.push(viewer.entities.add({
-                    position:pickpos,
-                    point:{
-                        color:Cesium.Color.DEEPPINK,
-                        pixelSize:10
-                    }
-                }))
-            }
+      snowTileset.value = new Cesium.Cesium3DTileset({
+        url: "//data.mars3d.cn/3dtiles/qx-shequ/tileset.json",
+        enableModelExperimental: true,
+        skipLevelOfDetail: true,
+        maximumScreenSpaceError: 64,
+      });
+      viewer.scene.primitives.add(snowTileset.value);
+      await snowTileset.value.readyPromise;
+      viewer.zoomTo(snowTileset.value);
+      return snowTileset.value;
+    };
 
-        }
+    /**
+     * 倾斜摄影压平 —— 打开压平面板
+     */
+    const flat3Dtiles = async () => {
+      await loadSnowTileset();
+      flattenPanelVisible.value = true;
+    };
 
-    },Cesium.ScreenSpaceEventType.LEFT_DOWN)
-    handler.setInputAction(evt=>{
-        if(polygon){
-            polygon.polygon=
-                {
-                    hierarchy:new Cesium.PolygonHierarchy(polygonPos),
-                    material:Cesium.Color.fromCssColorString('#a8e362').withAlpha(0.2),
-                    perPositionHeight :true
-                }
-            let customerShader = new Cesium.CustomShader({
-                lightingModel:Cesium.LightingModel.UNLIT,
-                uniforms:{
-                    u1pos:{
-                        type:Cesium.UniformType.VEC3,
-                        value:polygonPos[0]
-                    },
-                    u2pos:{
-                        type:Cesium.UniformType.VEC3,
-                        value:polygonPos[1]
-                    },
-                    u3pos:{
-                        type:Cesium.UniformType.VEC3,
-                        value:polygonPos[2]
-                    },
-                    u4pos:{
-                        type:Cesium.UniformType.VEC3,
-                        value:polygonPos[3]
-                    }
-                },
-                vertexShaderText:`
-                void vertexMain(VertexInput vsInput, inout czm_modelVertexOutput vsOutput) {
-                     vec3 p = vsOutput.positionMC;
-                     float px = p.x;
-                     float pz = p.z;
-
-                      vec4 u1posMC = czm_inverseModel * vec4(u1pos,1.);
-                      vec4 u2posMC = czm_inverseModel * vec4(u2pos,1.);
-                      vec4 u3posMC = czm_inverseModel * vec4(u3pos,1.);
-                      vec4 u4posMC = czm_inverseModel * vec4(u4pos,1.);
-
-                     bool flag = false;
-                     vec4 tem1;
-                     vec4 tem2;
-                     for(int i=0;i<4;i++){
-
-                          if(i == 0) {
-                           tem1 = u1posMC;
-                           tem2 = u4posMC;
-                          }
-                          else if(i == 1){
-                           tem1 = u2posMC;
-                           tem2 = u1posMC;
-                           }
-                          else if(i == 2){
-                           tem1 = u3posMC;
-                           tem2 = u2posMC;
-                           }
-                          else {
-                           tem1 = u4posMC;
-                           tem2 = u3posMC;
-                           }
-
-                         float sx = tem1.x;
-                         float sz = tem1.z;
-                         float tx = tem2.x;
-                         float tz = tem2.z;
-
-                         if((sx == px && sz ==pz) ||(tx == px && tz ==pz)){
-                             // return true;
-                             // return
-                         }
-
-                         if((sz < pz && tz >= pz) || (sz >= pz && tz < pz)) {
-
-                             float x = sx + (pz - sz) * (tx - sx) / (tz - sz);
-
-                             if(x == px) {
-
-                                 // return true;
-                                 // return
-                             }
-
-                             if(x > px) {
-                                 flag = !flag;
-                             }
-                              }
-
-                                  }//for end
-
-                                  if(flag){
-                                   vsOutput.positionMC.y = tem1.y ;
-                                  }
-                             }
-                `
-
-            })
-            tileset.customShader = customerShader
-        }
-
-
-        isDrawing = false
-
-
-    },Cesium.ScreenSpaceEventType.RIGHT_CLICK)
-
+    /**
+     * 关闭压平面板
+     */
+    const closeFlattenPanel = () => {
+      flattenPanelVisible.value = false;
     };
 
     const add3DtilesTest = () => {
@@ -1264,10 +1165,9 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
     throw(error);
   });
 };
-    const add3DtilesSnow = () => {
-      const { viewer } = store.state;
-      add3DtilesQiantong();
-      snowEffect = new SnowCoverStageEffect(viewer, {
+    const add3DtilesSnow = async () => {
+      const tileset = await loadSnowTileset();
+      snowEffect = new SnowCoverStageEffect(tileset, {
         alpha: 0.9,  // 设置积雪透明度
         snowCoverage: 0.6  // 设置积雪覆盖率
       });
@@ -1280,7 +1180,6 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
 
       // 动态修改透明度
       snowEffect.changeAlpha(1.0);
-
     };
 
     const close3DtilesSnow = () => {
@@ -1288,10 +1187,10 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       snowEffect = null;
     };
 
-    const add3DtilesSnow2 = () => {
-      const { viewer } = store.state;
-      add3DtilesQiantong();
-      snowEffect2 = new SnowCover(viewer)
+    const add3DtilesSnow2 = async () => {
+      const tileset = await loadSnowTileset();
+      snowEffect2 = new SnowCover(tileset);
+      snowEffect2.setSnowCoverValue(0.5);
     };
 
     const close3DtilesSnow2 = () => {
@@ -1299,25 +1198,12 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       snowEffect2 = null;
     };
 
-    const add3DtilesSnow3 = () => {
-      const { viewer } = store.state;
-      add3DtilesQiantong();
-      // 创建积雪效果实例
-      snowEffect3 = new SnowCoverEffect(viewer, {
-        snowColor: Cesium.Color.WHITE, // 可以传入自定义颜色
+    const add3DtilesSnow3 = async () => {
+      const tileset = await loadSnowTileset();
+      snowEffect3 = new SnowCoverEffect(tileset, {
+        snowColor: Cesium.Color.WHITE,
       });
-
-      // 启用积雪效果
       snowEffect3.show(true);
-
-      // 动态更改积雪颜色
-      // snowEffect3.changeSnowColor(Cesium.Color.LIGHTBLUE);
-
-      // // 关闭积雪效果
-      // snowEffect3.show(false);
-
-      // // 销毁积雪效果
-      // snowEffect3.destroy();
     };
 
     const close3DtilesSnow3 = () => {
@@ -1326,36 +1212,13 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       snowEffect3 = null;
     };
 
-    const add3DtilesSnow4 = () => {
-      const { viewer } = store.state;
-      add3DtilesQiantong();
-      // 创建积雪效果实例
-      snowEffect4 = new SnowEffect(viewer, {
-        snowIntensity: 1.0  // 可根据需求调整积雪强度
+    const add3DtilesSnow4 = async () => {
+      const tileset = await loadSnowTileset();
+      snowEffect4 = new SnowEffect(tileset, {
+        snowIntensity: 1.0
       });
-
-      // 启用积雪效果
       snowEffect4.show(true);
-
-      // 动态调整积雪强度
       snowEffect4.changeSnowIntensity(1.8);
-      viewer.scene.camera.frustum.far = 10000; // adjust far clipping plane to a reasonable distance
-
-
-      
-
-//       // 创建积雪效果对象
-// snowEffect4 = new SnowEffect(viewer, {
-//     alpha: 0.1, // 初始积雪厚度
-//     snowColor: Cesium.Color.WHITE // 初始积雪颜色，使用 Cesium.Color
-// });
-
-// // 调整积雪厚度
-// snowEffect4.changeAlpha(1.9);
-
-// // 显示或隐藏积雪效果
-// snowEffect4.show(true);
-
     };
 
     const addSnow = () => {
@@ -1376,11 +1239,11 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
     };
 
     const close3DtilesSnow4 = () => {
-       // // 关闭积雪效果
-      snowEffect4.show(false);
-      // 销毁积雪效果
-      snowEffect4 && snowEffect4.destroy();
-      snowEffect4 = null;
+      if (snowEffect4) {
+        snowEffect4.show(false);
+        snowEffect4.destroy();
+        snowEffect4 = null;
+      }
     }
     const addHeightFog = () => {
       const { viewer } = store.state;
@@ -1446,6 +1309,29 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
     };
     const handleClear = () => {
       const { viewer } = store.state;
+      // 清除积雪效果
+      if (snowEffect) { snowEffect.destroy(); snowEffect = null; }
+      if (snowEffect2) { snowEffect2.destroy(); snowEffect2 = null; }
+      if (snowEffect3) { snowEffect3.destroy(); snowEffect3 = null; }
+      if (snowEffect4) { snowEffect4.destroy(); snowEffect4 = null; }
+      // 关闭压平面板
+      flattenPanelVisible.value = false;
+      // 清除压平绘制实体
+      if (viewer) {
+        const targetNames = ["flatten-polygon", "flatten-line", "flatten-point"];
+        const toRemove = [];
+        viewer.entities.values.forEach((entity) => {
+          if (entity.name && targetNames.includes(entity.name)) {
+            toRemove.push(entity);
+          }
+        });
+        toRemove.forEach((e) => viewer.entities.remove(e));
+      }
+      // 清除共享 tileset
+      if (snowTileset.value && viewer) {
+        viewer.scene.primitives.remove(snowTileset.value);
+        snowTileset.value = null;
+      }
     };
     onMounted(() => {
       const { viewer } = store.state;
@@ -1480,6 +1366,10 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
       add3DtilesSnow4,
       close3DtilesSnow4,
       flat3Dtiles,
+      closeFlattenPanel,
+      flattenPanelVisible,
+      snowTileset,
+      viewerRef,
       addSnow,
       closeSnow,
       addHeightFog,

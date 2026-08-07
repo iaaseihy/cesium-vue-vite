@@ -1,127 +1,98 @@
 /*
- * @Descripttion: 
- * @version: v1.0
- * @Author: CaoChaoqiang
- * @Date: 2024-09-25 15:47:21
- * @LastEditors: CaoChaoqiang
- * @LastEditTime: 2024-09-25 15:47:39
- */
-/**
- * @description: 积雪效果
- * @param {*}
- * @return {*}
+ * @Descripttion: 倾斜摄影积雪效果1 —— 基于 CustomShader
+ * 使用 dFdx/dFdy 从位置导数计算法线，确保在3D Tiles上可靠工作
+ * 支持透明度(alpha)与覆盖率(snowCoverage)调节
  */
 import * as Cesium from "cesium";
 
 export default class SnowCoverStageEffect {
-  constructor(viewer, options) {
-    if (!viewer) throw new Error("no viewer object!");
+  /**
+   * @param {Cesium.Cesium3DTileset} tileset 倾斜摄影模型
+   * @param {Object} options { alpha, snowCoverage }
+   */
+  constructor(tileset, options) {
+    if (!tileset) throw new Error("no tileset object!");
     options = options || {};
-    this.viewer = viewer;
-    this.alpha = options.alpha || 1.0;  // 透明度控制
-    this.snowCoverage = options.snowCoverage || 0.5;  // 积雪覆盖率控制
-    this.init();
+    this.tileset = tileset;
+    this.alpha = options.alpha ?? 0.8;
+    this.snowCoverage = options.snowCoverage ?? 0.6;
+    this._originalShader = tileset.customShader || undefined;
+    this._visible = true;
+    this._buildShader();
   }
 
-  init() {
-    this.snowcoverStage = new Cesium.PostProcessStage({
-      name: "czm_snowcover",
-      fragmentShader: this.snowcover(),
+  _buildShader() {
+    this._customShader = new Cesium.CustomShader({
       uniforms: {
-        alpha: () => {
-          return this.alpha;
+        u_alpha: {
+          type: Cesium.UniformType.FLOAT,
+          value: this.alpha,
         },
-        snowCoverage: () => {
-          return this.snowCoverage;
-        }
+        u_snowCoverage: {
+          type: Cesium.UniformType.FLOAT,
+          value: this.snowCoverage,
+        },
       },
+      fragmentShaderText: `
+        void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
+          vec3 positionEC = fsInput.attributes.positionEC;
+
+          // 用位置导数计算法线（比 normalEC 属性更可靠）
+          vec3 dx = dFdx(positionEC);
+          vec3 dy = dFdy(positionEC);
+          vec3 normalEC = normalize(cross(dx, dy));
+
+          // 确保法线朝向相机
+          if (dot(normalEC, positionEC) > 0.0) {
+            normalEC = -normalEC;
+          }
+
+          vec3 normalWC = normalize(czm_inverseViewRotation * normalEC);
+          vec3 positionWC = fsInput.attributes.positionWC;
+          vec3 upWC = normalize(positionWC);
+
+          // 只在朝上的面（屋顶等）覆盖积雪
+          float dotVal = dot(upWC, normalWC);
+          float snowFactor = smoothstep(0.5, 0.85, dotVal * u_snowCoverage + (1.0 - u_snowCoverage) * 0.3);
+
+          // 积雪颜色：略带蓝调的白色
+          vec3 snowColor = vec3(0.92, 0.95, 1.0);
+          material.diffuse = mix(material.diffuse, snowColor, snowFactor * u_alpha);
+          // 积雪面降低高光
+          material.specular = mix(material.specular, vec3(0.0), snowFactor * u_alpha);
+        }
+      `,
     });
-    this.viewer.scene.postProcessStages.add(this.snowcoverStage);
+    if (this._visible) {
+      this.tileset.customShader = this._customShader;
+    }
   }
 
   destroy() {
-    if (!this.viewer || !this.snowcoverStage) return;
-    this.viewer.scene.postProcessStages.remove(this.snowcoverStage);
-    Cesium.destroyObject(this.snowcoverStage);
+    if (!this.tileset) return;
+    this.tileset.customShader = this._originalShader;
   }
 
   show(visible) {
-    this.snowcoverStage.enabled = visible;
+    this._visible = visible;
+    if (visible) {
+      this.tileset.customShader = this._customShader;
+    } else {
+      this.tileset.customShader = this._originalShader;
+    }
   }
 
   changeAlpha(value) {
-    this.snowcoverStage.uniforms.alpha = value;
+    this.alpha = value;
+    if (this._customShader) {
+      this._customShader.setUniform("u_alpha", value);
+    }
   }
 
   changeSnowCoverage(value) {
-    this.snowcoverStage.uniforms.snowCoverage = value;  // 改变积雪覆盖率
-  }
-
-  snowcover() {
-    return `
-        uniform float alpha;
-        uniform float snowCoverage;  // 积雪覆盖率
-        uniform sampler2D colorTexture;
-        uniform sampler2D depthTexture;
-        in vec2 v_textureCoordinates;
-
-        vec4 toEye(in vec2 uv, in float depth){
-            vec2 xy = vec2((uv.x * 2.0 - 1.0), (uv.y * 2.0 - 1.0));
-            vec4 posInCamera = czm_inverseProjection * vec4(xy, depth, 1.0);
-            posInCamera = posInCamera / posInCamera.w;
-            return posInCamera;
-        }
-
-        float getDepth(in vec4 depth){
-            float z_window = czm_unpackDepth(depth);
-            z_window = czm_reverseLogDepth(z_window);
-            float n_range = czm_depthRange.near;
-            float f_range = czm_depthRange.far;
-            return (2.0 * z_window - n_range - f_range) / (f_range - n_range);
-        }
-
-        void main(void) {
-            vec4 white = vec4(1.0, 1.0, 1.0, 1.0);  // 雪的颜色
-            vec4 color = texture(colorTexture, v_textureCoordinates);  // 原始颜色
-            vec4 originDepth = texture(depthTexture, v_textureCoordinates);  // 深度纹理
-            float depth = czm_unpackDepth(originDepth);
-
-            if (depth >= 1.0) {
-                out_FragColor = color;
-                return;
-            }
-
-            vec4 positionEC = toEye(v_textureCoordinates, depth);
-            vec4 positionWC = czm_inverseView * positionEC;
-
-            // 计算邻近像素的深度，确定法线方向
-            float padx = czm_pixelRatio / czm_viewport.z;
-            float pady = czm_pixelRatio / czm_viewport.w;
-            float depth2 = getDepth(texture(depthTexture, v_textureCoordinates + vec2(-padx, 0.0)));
-            vec4 eyeCoordinates2 = toEye(v_textureCoordinates + vec2(-padx, 0.0), depth2);
-            float depth3 = getDepth(texture(depthTexture, v_textureCoordinates + vec2(padx, 0.0)));
-            vec4 eyeCoordinates3 = toEye(v_textureCoordinates + vec2(padx, 0.0), depth3);
-            float depth4 = getDepth(texture(depthTexture, v_textureCoordinates + vec2(0.0, -pady)));
-            vec4 eyeCoordinates4 = toEye(v_textureCoordinates + vec2(0.0, -pady), depth4);
-            float depth5 = getDepth(texture(depthTexture, v_textureCoordinates + vec2(0.0, pady)));
-            vec4 eyeCoordinates5 = toEye(v_textureCoordinates + vec2(0.0, pady), depth5);
-
-            // 计算法线
-            vec3 dx = eyeCoordinates3.xyz - eyeCoordinates2.xyz;
-            vec3 dy = eyeCoordinates4.xyz - eyeCoordinates5.xyz;
-            vec3 normalEC = normalize(cross(dy, dx));
-            vec3 normalWC = czm_inverseViewRotation * normalEC;
-            vec3 upWC = normalize(positionWC.xyz);
-
-            // 计算与法线的角度，确定雪的覆盖范围
-            float angle = dot(upWC, normalWC);
-
-            // 根据积雪覆盖率和角度确定积雪量
-            float snowFactor = clamp(angle * snowCoverage, 0.0, 1.0);
-
-            // 混合积雪颜色和原始颜色
-            out_FragColor = mix(color, white, snowFactor * alpha);
-        }
-    `;
+    this.snowCoverage = value;
+    if (this._customShader) {
+      this._customShader.setUniform("u_snowCoverage", value);
+    }
   }
 }
