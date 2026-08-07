@@ -50,7 +50,7 @@ import {
 } from "./mapjs/entityprimitiveOperation.js";
 import {
   CeateRainEffect,
-  CeateSnowEffect,
+  CreateSnowEffect,
   CeateFogEffect,
 } from "./mapjs/weather.js";
 import { createWaterFlowPartical } from "./mapjs/waterflow.js";
@@ -819,7 +819,7 @@ const setWeatherVisible = (viewer, param) => {
         break;
       }
       case "weather_snow": {
-        weatherInfo._weatherObj[type] = CeateSnowEffect(viewer, type);
+        weatherInfo._weatherObj[type] = CreateSnowEffect(viewer, type);
         break;
       }
       case "weather_fog": {

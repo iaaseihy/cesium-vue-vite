@@ -37,6 +37,15 @@ export default defineConfig({
       VUE_APP_BASE_API: '/api'
     },
   },
+  // 解决 @cesium/engine 等依赖中使用 BigInt 字面量(如 0n)的构建目标问题
+  build: {
+    target: 'esnext'
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'esnext'
+    }
+  },
   server: {
     port: 81,
     host: true,
