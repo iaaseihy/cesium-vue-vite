@@ -1,0 +1,11 @@
+allowBuilds:
+  '@parcel/watcher': true
+  core-js: true
+  esbuild: true
+  protobufjs: true
+onlyBuiltDependencies:
+  - esbuild
+  - "@parcel/watcher"
+  - core-js
+  - protobufjs
+nodeLinker: hoisted
